@@ -25,6 +25,12 @@ CREATE TABLE IF NOT EXISTS "ClinicalInstitution" (
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Indexes for ClinicalInstitution:
+-- Optimize search by institution name.
+CREATE INDEX idx_clinicalinstitution_name ON "ClinicalInstitution"("ClinicalInstitutionName");
+-- Speed up queries filtering out soft-deleted records.
+CREATE INDEX idx_clinicalinstitution_isdeleted ON "ClinicalInstitution"("IsDeleted");
+
 COMMIT;
 -- End of the ClinicalInstitution Table creation
 
