@@ -1,6 +1,7 @@
 -- For PostgreSQL Database Schema for SIGMAmed Medication System
 -- In this project, our group will collaborate using the online Service "GitHub" and "Supabase" for simulating the online database environment.
 -- This script created for the both local development and deployment to Supabase PostgreSQL database
+-- Assume use the default public database in PostgreSQL for both local and Supabase deployment
 
 -- Enable necessary extensions for PostgreSQL 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
