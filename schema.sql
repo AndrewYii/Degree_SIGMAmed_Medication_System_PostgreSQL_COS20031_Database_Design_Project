@@ -42,7 +42,7 @@ BEGIN;
 -- User Table (base table for different roles)
 
 -- Add foreign key constraint to link User to ClinicalInstitution
-ALTER TABLE "User" ADD CONSTRAINT "fk_user_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionId") REFERENCES "ClinicalInstitution"("ClinicalInstituionID");
+ALTER TABLE "User" ADD CONSTRAINT "fk_user_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionId") REFERENCES "ClinicalInstitution"("ClinicalInstitutionID");
 
 COMMIT;
 -- End of the User Table creation
