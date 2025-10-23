@@ -3,8 +3,9 @@
 -- This script created for the both local development and deployment to Supabase PostgreSQL database
 -- Assume use the default public database in PostgreSQL for both local and Supabase deployment
 
--- Enable necessary extensions for PostgreSQL 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable necessary extensions for PostgreSQL
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "citext";
 
 -- Create custom ENUM types
@@ -110,8 +111,8 @@ CREATE TABLE IF NOT EXISTS "MedicationLog" (
     "MedicationID" UUID,
     "ActedBy" UUID,
     "ActionType" action_type NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -136,8 +137,8 @@ CREATE TABLE IF NOT EXISTS "UserLog" (
     "UserId" UUID,
     "ActedBy" UUID,
     "ActionType" action_type NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "Reason" TEXT,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
@@ -187,7 +188,7 @@ CREATE TABLE IF NOT EXISTS "Patient" (
     "WeightKg" DECIMAL(5,2)  NULL,
     "EmergencyContactName" VARCHAR(100) NULL,
     "EmergencyContactNumber" VARCHAR(20) NULL,
-    "MedicationAllergies" JSONB DEFAULT []
+    "MedicationAllergies" JSONB DEFAULT '[]'::jsonb
 );
 
 -- Search the patient table based on the patient number
@@ -226,8 +227,8 @@ CREATE TABLE IF NOT EXISTS "MedicalHistoryLog" (
     "MedicalHistoryId" UUID,
     "ActedBy" UUID,
     "ActionType" action_type NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "Reason" TEXT,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
@@ -293,8 +294,8 @@ CREATE TABLE IF NOT EXISTS "AssignedDoctorLog" (
     "AssignedDoctorId" UUID,
     "ActedBy" UUID,
     "ActionType" action_type NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -353,8 +354,8 @@ CREATE TABLE IF NOT EXISTS "PresciptionLog" (
     "PrescriptionId" UUID,
     "ActedBy" UUID,
     "ActionType" log_action NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "Reason" TEXT,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
@@ -404,8 +405,8 @@ CREATE TABLE IF NOT EXISTS "PatientReportLog" (
     "PatientReportId" UUID,
     "ActedBy" UUID,
     "ActionType" action_type NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -469,8 +470,8 @@ CREATE TABLE IF NOT EXISTS "PatientSideEffectLog" (
     "PatientSideEffectId" UUID,
     "ActedBy" UUID,
     "ActionType" log_action NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "Reason" TEXT,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
@@ -512,8 +513,8 @@ CREATE TABLE IF NOT EXISTS "PrescribedMedicationScheduleLog" (
     "PrescribedMedicationScheduleId" UUID,
     "ActedBy" UUID,
     "ActionType" log_action NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "Reason" TEXT,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
@@ -541,7 +542,7 @@ CREATE TABLE IF NOT EXISTS "Appointment" (
     "AppointmentTime" TIME NOT NULL,
     "DurationMinutes" INT NOT NULL,
     "AppointmentType" appointment_type  NOT NULL,
-    "Status" appointment_status DEFAULT scheduled;
+    "Status" appointment_status DEFAULT scheduled,
     "Notes" TEXT NULL,
     "IsEmergency" BOOLEAN DEFAULT FALSE,
     "IsDeleted" BOOLEAN DEFAULT FALSE 
@@ -567,8 +568,8 @@ CREATE TABLE IF NOT EXISTS "AppointmentLog" (
     "AppointmentId" UUID,
     "ActedBy" UUID,
     "ActionType" action_type NOT NULL,
-    "PreviousValue" JSONB DEFAULT [],
-    "Action" JSONB DEFAULT [],
+    "PreviousValue" JSONB DEFAULT '[]'::jsonb,
+    "Action" JSONB DEFAULT '[]'::jsonb,
     "Reason" TEXT,
     "ActedAt" TIMESTAMPTZ DEFAULT NOW()
 );
