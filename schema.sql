@@ -97,7 +97,7 @@ CREATE INDEX idx_medication_name ON "Medication"("MedicationName");
 CREATE INDEX idx_clinical_institutionid ON "Medication"("ClinicalInstitutionID");
 
 -- Add foreign key constraint to link Medication to ClinicalInstitution
-ALTER TABLE "Medication" ADD CONSTRAINT "fk_medication_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionId") REFERENCES "ClinicalInstitution"("ClinicalInstituionID");
+ALTER TABLE "Medication" ADD CONSTRAINT "fk_medication_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionID") REFERENCES "ClinicalInstitution"("ClinicalInstitutionID");
 
 COMMIT;
 -- End of the Medication Table creation
