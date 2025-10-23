@@ -1,6 +1,7 @@
 -- For PostgreSQL Database Schema for SIGMAmed Medication System
 -- In this project, our group will collaborate using the online Service "GitHub" and "Supabase" for simulating the online database environment.
 -- This script created for the both local development and deployment to Supabase PostgreSQL database
+-- Assume use the default public database in PostgreSQL for both local and Supabase deployment
 
 -- Enable necessary extensions for PostgreSQL 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -24,6 +25,12 @@ CREATE TABLE IF NOT EXISTS "ClinicalInstitution" (
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Indexes for ClinicalInstitution:
+-- Optimize search by institution name.
+CREATE INDEX idx_clinicalinstitution_name ON "ClinicalInstitution"("ClinicalInstitutionName");
+-- Speed up queries filtering out soft-deleted records.
+CREATE INDEX idx_clinicalinstitution_isdeleted ON "ClinicalInstitution"("IsDeleted");
 
 COMMIT;
 -- End of the ClinicalInstitution Table creation
@@ -51,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "IsDeleted" BOOLEAN DEFAULT FALSE
 );
 -- Add foreign key constraint to link User to ClinicalInstitution
-ALTER TABLE "User" ADD CONSTRAINT "fk_user_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionId") REFERENCES "ClinicalInstitution"("ClinicalInstituionID");
+ALTER TABLE "User" ADD CONSTRAINT "fk_user_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionId") REFERENCES "ClinicalInstitution"("ClinicalInstitutionID");
 
 COMMIT;
 -- End of the User Table creation
