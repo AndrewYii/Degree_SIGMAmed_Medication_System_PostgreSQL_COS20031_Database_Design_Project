@@ -314,7 +314,7 @@ COMMIT;
 BEGIN;
 
 -- Prescription Table
-CREATE TABLE IF NOT EXISTS "Presciption" (
+CREATE TABLE IF NOT EXISTS "Prescription" (
     "PrescriptionId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "DoctorId" UUID,
     "PatientId" UUID,
@@ -340,7 +340,7 @@ ALTER TABLE "Prescription" ADD CONSTRAINT "fk_prescription_doctor" FOREIGN KEY (
 -- Add foreign key constraint to link Prescription to Patient
 ALTER TABLE "Prescription" ADD CONSTRAINT "fk_prescription_patient" FOREIGN KEY ("PatientId") REFERENCES "Patient"("UserId");
 -- Add foreign key constraint to link Prescription to Medication
-ALTER TABLE "Prescription" ADD CONSTRAINT "fk_prescription_medication" FOREIGN KEY ("MedicationId") REFERENCES "Medication"("MedicationId");
+ALTER TABLE "Prescription" ADD CONSTRAINT "fk_prescription_medication" FOREIGN KEY ("MedicationId") REFERENCES "Medication"("MedicationID");
 
 COMMIT;
 -- End of the Prescription Table creation
@@ -349,7 +349,7 @@ COMMIT;
 BEGIN;
 
 -- Prescription Log Table
-CREATE TABLE IF NOT EXISTS "PresciptionLog" (
+CREATE TABLE IF NOT EXISTS "PrescriptionLog" (
     "LogId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescriptionId" UUID,
     "ActedBy" UUID,
@@ -364,7 +364,7 @@ CREATE TABLE IF NOT EXISTS "PresciptionLog" (
 CREATE INDEX idx_plog_prescription ON "PrescriptionLog"("PrescriptionId");
 
 -- Add foreign key constraint to link PrescriptionLog to Prescription
-ALTER TABLE "Prescriptionlog" ADD CONSTRAINT "fk_prescriptionlog_prescription" FOREIGN KEY ("PrescriptionId") REFERENCES "Prescription"("PrescriptionId");
+ALTER TABLE "PrescriptionLog" ADD CONSTRAINT "fk_prescriptionlog_prescription" FOREIGN KEY ("PrescriptionId") REFERENCES "Prescription"("PrescriptionId");
 -- Add foreign key constraint to link Prescription Log to User
 ALTER TABLE "PrescriptionLog" ADD CONSTRAINT "fk_prescriptionlog_modify" FOREIGN KEY ("ActedBy") REFERENCES "User"("UserId");
 
@@ -414,7 +414,7 @@ CREATE TABLE IF NOT EXISTS "PatientReportLog" (
 CREATE INDEX idx_prlog_patientreport ON "PatientReportLog"("PatientReportId");
 
 -- Add foreign key constraint to link PatientReportLog to Patient Report
-ALTER TABLE "Prescriptionlog" ADD CONSTRAINT "fk_prescriptionlog_prescription" FOREIGN KEY ("PrescriptionId") REFERENCES "Prescription"("PrescriptionId");
+ALTER TABLE "PatientReportLog" ADD CONSTRAINT "fk_patientreportlog_patientreport" FOREIGN KEY ("PatientReportId") REFERENCES "PatientReport"("PatientReportID");
 -- Add foreign key constraint to link Patient Report Log to User
 ALTER TABLE "PatientReportLog" ADD CONSTRAINT "fk_prlog_modify" FOREIGN KEY ("ActedBy") REFERENCES "User"("UserId");
 
@@ -542,7 +542,7 @@ CREATE TABLE IF NOT EXISTS "Appointment" (
     "AppointmentTime" TIME NOT NULL,
     "DurationMinutes" INT NOT NULL,
     "AppointmentType" appointment_type  NOT NULL,
-    "Status" appointment_status DEFAULT scheduled,
+    "Status" appointment_status DEFAULT 'scheduled',
     "Notes" TEXT NULL,
     "IsEmergency" BOOLEAN DEFAULT FALSE,
     "IsDeleted" BOOLEAN DEFAULT FALSE 
