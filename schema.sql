@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS "User" (
 CREATE INDEX idx_user_role ON "User"("Role");
 
 -- Add foreign key constraint to link User to ClinicalInstitution
-ALTER TABLE "User" ADD CONSTRAINT "fk_user_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionId") REFERENCES "ClinicalInstitution"("ClinicalInstitutionID");
+ALTER TABLE "User" ADD CONSTRAINT "fk_user_clinicalinstitution" FOREIGN KEY ("ClinicalInstitutionID") REFERENCES "ClinicalInstitution"("ClinicalInstitutionID");
 
 COMMIT;
 -- End of the User Table creation
