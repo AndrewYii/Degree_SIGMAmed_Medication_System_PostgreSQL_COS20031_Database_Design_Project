@@ -84,7 +84,7 @@ BEGIN;
 -- Medication Table
 CREATE TABLE IF NOT EXISTS "Medication" (
     "MedicationID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "ClinicalInstitutionID" UUID
+    "ClinicalInstitutionID" UUID,
     "MedicationName" VARCHAR(100) NOT NULL,
     "TotalAmount" INT NOT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE
