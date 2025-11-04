@@ -26,3 +26,9 @@ CREATE TYPE "SIGMAmed".doctor_level_enum AS ENUM ('primary', 'secondary');
 CREATE TYPE "SIGMAmed".reminder_status_enum AS ENUM ('ignored', 'completed');
 CREATE TYPE "SIGMAmed".admin_level_enum AS ENUM ('super', 'hospital');
 CREATE TYPE "SIGMAmed".weekday_enum AS ENUM ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
+
+-- Create Types for Alerts and Notifications
+-- CREATE TYPE "SIGMAmed".alert_severity_enum AS ENUM ('low', 'medium', 'high', 'critical');
+-- CREATE TYPE "SIGMAmed".alert_status_enum AS ENUM ('pending', 'acknowledged', 'resolved', 'ignored');
+-- CREATE TYPE "SIGMAmed".notification_status_enum AS ENUM ('pending', 'sent', 'failed', 'cancelled');
+-- CREATE TYPE "SIGMAmed".notification_channel_enum AS ENUM ('push', 'email', 'sms', 'in_app');
