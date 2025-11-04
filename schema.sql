@@ -18,6 +18,8 @@ CREATE TYPE report_status AS ENUM ('Appointment', 'SideEffect', 'Symptom','No');
 CREATE TYPE reminder_status AS ENUM ('ignored','completed');
 CREATE TYPE appointment_type AS ENUM('consultation','follow-up');
 CREATE TYPE appointment_status AS ENUM('scheduled','confirmed','completed','cancelled');
+CREATE TYPE admin_type AS ENUM('super', 'hospital');
+CREATE TYPE weekday AS ENUM('Mon','Tue','Wed','Thu','Fri','Sat','Sun');
 
 -- Create the SIGMAmed schema
 CREATE SCHEMA IF NOT EXISTS "SIGMAmed";
@@ -153,6 +155,24 @@ ALTER TABLE "UserLog" ADD CONSTRAINT "fk_userlog_modify" FOREIGN KEY ("ActedBy")
 
 COMMIT;
 -- End of the User Log Table creation
+
+-- Start transaction for Creating Admin Table
+BEGIN;
+
+-- Admin Table
+CREATE TABLE IF NOT EXISTS "Admin" (
+    "UserId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "AdminLevel" admin_level  NULL
+);
+
+-- Search the admin table based on the admin level
+CREATE INDEX idx_admin_level ON "Admin"("AdminLevel");
+
+-- Add foreign key constraint to link Admin to User
+ALTER TABLE "Admin" ADD CONSTRAINT "fk_admin_user" FOREIGN KEY ("UserId") REFERENCES "User"("UserId");
+
+COMMIT;
+-- End of the Admin Table creation
 
 -- Start transaction for Creating Doctor Table
 BEGIN;
@@ -421,6 +441,31 @@ ALTER TABLE "PatientReportLog" ADD CONSTRAINT "fk_prlog_modify" FOREIGN KEY ("Ac
 COMMIT;
 -- End of the Patient Report Log Table creation
 
+-- Start transaction for Creating Prescribed Medication Table
+BEGIN;
+
+-- Prescribed Medication Table
+CREATE TABLE IF NOT EXISTS "PrescribedMedication" (
+    "PrescribedMedicationId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "MedicationId" UUID,
+    "PrescriptionId" UUID,
+    "DurationDays" INT NOT NULL,
+    "DosageAmountPrescribed" INT NOT NULL,
+    "Status" prescription_status NOT NULL,
+    "PrescribedDate" DATE NOT NULL,
+    "StartDate" DATE NOT NULL,
+    "EndDate" DATE NOT NULL,
+    "IsDeleted" BOOLEAN DEFAULT FALSE
+);
+
+-- Add foreign key constraint to link Prescribed Medication to Medication
+ALTER TABLE "PrescribedMedication" ADD CONSTRAINT "fk_pm_medication" FOREIGN KEY ("MedicationId") REFERENCES "Medication"("MedicationId");
+-- Add foreign key constraint to link Prescribed Medication to Prescription
+ALTER TABLE "PrescribedMedication" ADD CONSTRAINT "fk_pm_prescription" FOREIGN KEY ("PrescriptionId") REFERENCES "Prescription"("PrescriptionId");
+
+COMMIT;
+-- End of the Prescribed Medication Table creation
+
 -- Start transaction for Creating Prescribed Medication Schedule Table
 BEGIN;
 
@@ -428,7 +473,9 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS "PrescribedMedicationSchedule" (
     "PrescribedMedicationScheduleId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescriptionId" UUID,
-    "MealTiming" TIMESTAMPTZ NOT NULL
+    "Weekday" weekday NOT NULL,
+    "MealTiming" TIMESTAMPTZ NOT NULL,
+    "Dose" INT NOT NULL
 );
 
 -- Add foreign key constraint to link Prescribed Medication Schedule to Prescription
