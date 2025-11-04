@@ -9,17 +9,13 @@ CREATE TABLE "SIGMAmed"."Prescription" (
     "PrescriptionId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "DoctorId" UUID NOT NULL REFERENCES "SIGMAmed"."Doctor"("UserId") ON DELETE RESTRICT,
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
-    "MedicationId" UUID NOT NULL REFERENCES "SIGMAmed"."Medication"("MedicationID") ON DELETE RESTRICT,
     "PrescriptionNumber" VARCHAR(50) UNIQUE NOT NULL,
     "Status" "SIGMAmed".prescription_status_enum NOT NULL,
     "PrescribedDate" DATE NOT NULL,
-    "StartDate" DATE NOT NULL,
-    "EndDate" DATE NOT NULL,
-    "IsDeleted" BOOLEAN DEFAULT FALSE,
-    CONSTRAINT chk_prescription_dates CHECK ("StartDate" <= "EndDate" AND "PrescribedDate" <= "StartDate")
+    "IsDeleted" BOOLEAN DEFAULT FALSE
 );
 
-COMMENT ON TABLE "SIGMAmed"."Prescription" IS 'Medication prescriptions issued by doctors';
+COMMENT ON TABLE "SIGMAmed"."Prescription" IS 'Main prescription header - contains overall prescription info';
 
 -- Commit transaction for Creating Prescription Table
 COMMIT;
