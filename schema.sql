@@ -6,14 +6,14 @@
 -- Create SIGMAmed Schema
 CREATE SCHEMA IF NOT EXISTS "SIGMAmed";
 
--- Set search path so we don't need to prefix everything
+-- Set search path to SIGMAmed and public schemas
 SET search_path TO "SIGMAmed", public;
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS "citext" SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA public;
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" SCHEMA public;
+-- CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" SCHEMA public;
 
 -- Create Enums for SIGMAmed
 CREATE TYPE "SIGMAmed".user_role_enum AS ENUM ('admin', 'doctor', 'patient');
