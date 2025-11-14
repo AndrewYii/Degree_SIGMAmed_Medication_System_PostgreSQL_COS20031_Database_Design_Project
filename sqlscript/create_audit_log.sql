@@ -7,7 +7,7 @@ BEGIN;
 CREATE TABLE "SIGMAmed"."AuditLog" (
     -- for supabase, need to use extensions.uuid_generate_v4()
     "AuditLogId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "ActedBy" UUID
+    "ActedBy" UUID REFERENCES "SIGMAmed"."User"("UserId"),
     "ActionTimestamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "TableName" VARCHAR(75) NOT NULL,
     "RecordId" UUID,
