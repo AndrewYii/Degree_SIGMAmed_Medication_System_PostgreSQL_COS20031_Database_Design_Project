@@ -11,7 +11,7 @@ CREATE TABLE "SIGMAmed"."Medication" (
     "MedicationID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "ClinicalInstitutionID" UUID NOT NULL REFERENCES "SIGMAmed"."ClinicalInstitution"("ClinicalInstitutionID") ON DELETE SET NULL,
     "MedicationName" VARCHAR(100) NOT NULL,
-    "TotalAmount" INT NOT NULL,
+    "TotalAmount" INT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     CONSTRAINT chk_total_amount CHECK ("TotalAmount" >= 0),
     UNIQUE("ClinicalInstitutionID", "MedicationName")

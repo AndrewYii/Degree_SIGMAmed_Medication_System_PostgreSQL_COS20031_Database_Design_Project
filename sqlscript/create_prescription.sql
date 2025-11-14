@@ -12,7 +12,8 @@ CREATE TABLE "SIGMAmed"."Prescription" (
     "PrescriptionNumber" VARCHAR(50) UNIQUE NOT NULL,
     "Status" "SIGMAmed".prescription_status_enum NOT NULL,
     "PrescribedDate" DATE NOT NULL,
-    "IsDeleted" BOOLEAN DEFAULT FALSE
+    "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "ExpiryDate" DATE NOT NULL
 );
 
 COMMENT ON TABLE "SIGMAmed"."Prescription" IS 'Main prescription header - contains overall prescription info';

@@ -9,8 +9,6 @@ CREATE TABLE "SIGMAmed"."PrescribedMedication" (
     "PrescribedMedicationId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescriptionId" UUID NOT NULL REFERENCES "SIGMAmed"."Prescription"("PrescriptionId") ON DELETE CASCADE,
     "MedicationId" UUID NOT NULL REFERENCES "SIGMAmed"."Medication"("MedicationID") ON DELETE RESTRICT,
-    "StartDate" DATE NOT NULL,
-    "EndDate" DATE NOT NULL,
     "DosageInstruction" TEXT,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     CONSTRAINT chk_prescribed_medication_dates CHECK ("StartDate" <= "EndDate"),

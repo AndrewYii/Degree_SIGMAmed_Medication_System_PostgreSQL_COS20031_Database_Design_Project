@@ -17,7 +17,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA public;
 
 -- Create Enums for SIGMAmed
 CREATE TYPE "SIGMAmed".user_role_enum AS ENUM ('admin', 'doctor', 'patient');
-CREATE TYPE "SIGMAmed".action_type_enum AS ENUM ('create', 'update', 'delete', 'restore');
+CREATE TYPE "SIGMAmed".action_type_enum AS ENUM ('create', 'update', 'delete');
 CREATE TYPE "SIGMAmed".prescription_status_enum AS ENUM ('active', 'completed');
 CREATE TYPE "SIGMAmed".appointment_status_enum AS ENUM ('scheduled', 'confirmed', 'completed', 'cancelled');
 CREATE TYPE "SIGMAmed".appointment_type_enum AS ENUM ('consultation', 'follow-up');

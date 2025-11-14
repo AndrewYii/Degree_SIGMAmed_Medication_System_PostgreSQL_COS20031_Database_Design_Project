@@ -8,10 +8,8 @@ CREATE TABLE "SIGMAmed"."PrescribedMedicationSchedule" (
     -- for supabase, need to use extensions.uuid_generate_v4()
     "PrescribedMedicationScheduleId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescribedMedicationId" UUID NOT NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId") ON DELETE CASCADE,
-    "Weekday" "SIGMAmed".weekday_enum NOT NULL,
-    "MealTiming" TIME NOT NULL,
-    "Dose" INT NOT NULL,
-    CONSTRAINT chk_dose CHECK ("Dose" > 0)
+    "ReminderTime" TIME NOT NULL,
+    "DayOfWeekMask" BINARY DEFAULT 0000000
 );
 
 COMMENT ON TABLE "SIGMAmed"."PrescribedMedicationSchedule" IS 'Medication intake schedule per prescribed medication';
