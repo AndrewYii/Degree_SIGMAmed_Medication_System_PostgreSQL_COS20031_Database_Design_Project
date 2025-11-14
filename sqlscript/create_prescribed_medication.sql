@@ -12,6 +12,8 @@ CREATE TABLE "SIGMAmed"."PrescribedMedication" (
     "DosageInstruction" TEXT,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     CONSTRAINT chk_prescribed_medication_dates CHECK ("StartDate" <= "EndDate"),
+    "MedicationNameSnapshot" VARCHAR(100) NOT NULL,
+    "MedicationIdSnapshot" UUID,
     UNIQUE("PrescriptionId", "MedicationId")
 );
 
