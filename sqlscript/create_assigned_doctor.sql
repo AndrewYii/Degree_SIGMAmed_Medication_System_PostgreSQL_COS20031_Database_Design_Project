@@ -12,6 +12,7 @@ CREATE TABLE "SIGMAmed"."AssignedDoctor" (
     "DoctorLevel" "SIGMAmed".doctor_level_enum NOT NULL,
     "AssignedTime" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
     UNIQUE("DoctorId", "PatientId", "DoctorLevel")
 );
 

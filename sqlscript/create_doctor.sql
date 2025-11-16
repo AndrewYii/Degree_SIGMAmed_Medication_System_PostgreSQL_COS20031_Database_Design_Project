@@ -9,9 +9,7 @@ CREATE TABLE "SIGMAmed"."Doctor" (
     "UserId" UUID PRIMARY KEY REFERENCES "SIGMAmed"."User"("UserId") ON DELETE CASCADE,
     "MedicalLicenseNumber" VARCHAR(50) UNIQUE NOT NULL,
     "Specialization" VARCHAR(100) NOT NULL,
-    "YearOfExperience" INT NOT NULL,
-    "MedicalSchool" VARCHAR(255) NOT NULL,
-    "Bio" TEXT,
+    "YearOfExperience" INT NOT NULL
     CONSTRAINT chk_experience CHECK ("YearOfExperience" >= 0 AND "YearOfExperience" <= 60)
 );
 

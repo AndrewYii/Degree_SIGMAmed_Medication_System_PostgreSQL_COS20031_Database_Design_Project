@@ -13,6 +13,7 @@ CREATE TABLE "SIGMAmed"."Medication" (
     "MedicationName" VARCHAR(100) NOT NULL,
     "TotalAmount" INT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_total_amount CHECK ("TotalAmount" >= 0),
     UNIQUE("ClinicalInstitutionID", "MedicationName")
 );

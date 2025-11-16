@@ -13,6 +13,7 @@ CREATE TABLE "SIGMAmed"."MedicalHistory" (
     "DiseaseName" VARCHAR(100) NOT NULL,
     "Severity" INT DEFAULT 0,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_severity CHECK ("Severity" >= 0 AND "Severity" <= 10)
 );
 

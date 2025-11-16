@@ -9,11 +9,13 @@ CREATE TABLE "SIGMAmed"."PrescribedMedication" (
     "PrescribedMedicationId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescriptionId" UUID NOT NULL REFERENCES "SIGMAmed"."Prescription"("PrescriptionId") ON DELETE CASCADE,
     "MedicationId" UUID NOT NULL REFERENCES "SIGMAmed"."Medication"("MedicationID") ON DELETE RESTRICT,
-    "DosageInstruction" TEXT,
+    "DosageAmountPrescribed" INT NOT NULL,
+    "Status" prescribedmedication_status_enum DEFAULT 'active',
+    "PrescribedDate" DATE NOT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
-    CONSTRAINT chk_prescribed_medication_dates CHECK ("StartDate" <= "EndDate"),
     "MedicationNameSnapshot" VARCHAR(100) NOT NULL,
-    "MedicationIdSnapshot" UUID,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT chk_prescribed_medication_dates CHECK ("StartDate" <= "EndDate"),
     UNIQUE("PrescriptionId", "MedicationId")
 );
 

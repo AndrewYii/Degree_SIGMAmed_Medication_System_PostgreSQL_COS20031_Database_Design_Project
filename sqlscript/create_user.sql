@@ -9,7 +9,7 @@ BEGIN;
 CREATE TABLE "SIGMAmed"."User" (
     -- for supabase, need to use extensions.uuid_generate_v4()
     "UserId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "ClinicalInstitutionId" UUID NOT NULL REFERENCES "SIGMAmed"."ClinicalInstitution"("ClinicalInstitutionID") ON DELETE RESTRICT,
+    "ClinicalInstitutionId" UUID NULL REFERENCES "SIGMAmed"."ClinicalInstitution"("ClinicalInstitutionID") ON DELETE RESTRICT,
     "Username" VARCHAR(50) UNIQUE NOT NULL,
     "Email" CITEXT UNIQUE NOT NULL,
     "PasswordHash" VARCHAR(255) NOT NULL,
@@ -20,8 +20,7 @@ CREATE TABLE "SIGMAmed"."User" (
     "Phone" VARCHAR(20) NOT NULL,
     "DateOfBirth" DATE NOT NULL,
     "FcmKey" VARCHAR(255),
-    "ProfilePictureUrl" TEXT,
-    "IsActive" BOOLEAN DEFAULT TRUE,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     CONSTRAINT chk_user_age CHECK (DATE_PART('year', AGE("DateOfBirth")) >= 0),
     CONSTRAINT chk_email_format CHECK ("Email" ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')

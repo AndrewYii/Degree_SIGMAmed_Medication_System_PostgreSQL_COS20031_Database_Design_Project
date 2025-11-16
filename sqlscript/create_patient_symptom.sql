@@ -9,8 +9,10 @@ BEGIN;
 CREATE TABLE "SIGMAmed"."PatientSymptom" (
     -- for supabase, need to use extensions.uuid_generate_v4()
     "PatientSymptomId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "MedicalHistoryId" UUID NOT NULL REFERENCES "SIGMAmed"."MedicalHistory"("MedicalHistoryId") ON DELETE CASCADE,
+    "MedicalHistoryId" UUID NULL REFERENCES "SIGMAmed"."MedicalHistory"("MedicalHistoryId"),
+    "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId"),
     "SymptomName" VARCHAR(100) NOT NULL,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE("MedicalHistoryId", "SymptomName")
 );
 

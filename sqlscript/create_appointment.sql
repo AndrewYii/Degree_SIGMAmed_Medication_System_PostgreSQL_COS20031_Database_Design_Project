@@ -17,6 +17,7 @@ CREATE TABLE "SIGMAmed"."Appointment" (
     "Notes" TEXT,
     "IsEmergency" BOOLEAN DEFAULT FALSE,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
     CONSTRAINT chk_duration CHECK ("DurationMinutes" > 0 AND "DurationMinutes" <= 480)
 );
 

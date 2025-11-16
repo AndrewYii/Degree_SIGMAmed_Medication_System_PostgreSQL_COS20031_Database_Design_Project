@@ -5,10 +5,13 @@ SET search_path TO "SIGMAmed", public;
 BEGIN;
 
 CREATE TABLE "SIGMAmed"."Reminder" (
-    "MedicationScheduleID" UUID PRIMARY KEY REFERENCES "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationScheduleId") ON DELETE CASCADE,
+    "ReminderID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "PrescribedMedicationScheduleID" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationScheduleId"),
+    "AppointmentID" UUID NULL REFERENCES "SIGMAmed"."Appointment"("AppointmentId"),
     "IsActive" BOOLEAN DEFAULT TRUE,
     "CurrentStatus" "SIGMAmed".reminder_status_enum NOT NULL,
-    "RemindGap" TIME
+    "RemindGap" INTERVAL NULL,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NULL
 );
 
 COMMENT ON TABLE "SIGMAmed"."Reminder" IS 'Medication intake reminders for patients';

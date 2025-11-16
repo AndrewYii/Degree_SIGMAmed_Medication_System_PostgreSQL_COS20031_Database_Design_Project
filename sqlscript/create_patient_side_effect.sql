@@ -10,9 +10,10 @@ CREATE TABLE "SIGMAmed"."PatientSideEffect" (
     "PrescribedMedicationID" UUID NOT NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId") ON DELETE CASCADE,
     "SideEffectName" VARCHAR(100) NOT NULL,
     "Severity" INT DEFAULT 0,
-    "OnsetDate" DATE,
+    "OnsetDate" DATE NOT NULL,
     "PatientNotes" TEXT,
-    "ResolutionDate" DATE,
+    "ResolutionDate" DATE NULL,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_side_effect_severity CHECK ("Severity" >= 0 AND "Severity" <= 10),
     CONSTRAINT chk_side_effect_dates CHECK ("ResolutionDate" IS NULL OR "OnsetDate" <= "ResolutionDate"),
     UNIQUE("PrescribedMedicationID", "SideEffectName")

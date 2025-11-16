@@ -9,9 +9,12 @@ CREATE TABLE "SIGMAmed"."PatientReport" (
     "PatientReportID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "DoctorId" UUID NOT NULL REFERENCES "SIGMAmed"."Doctor"("UserId") ON DELETE RESTRICT,
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
-    "Status" "SIGMAmed".patient_report_status_enum NOT NULL,
+    "PrescribedMedicationId" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId"),
+    "Type" "SIGMAmed".patient_report_status_enum NOT NULL,
     "Reason" TEXT,
-    "AttachmentDirectory" TEXT,
+    "AttachmentDirectory" TEXT NULL,
+    "Status" "SIGMAmed".report_status_enum DEFAULT "pending",
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE
 );
 
