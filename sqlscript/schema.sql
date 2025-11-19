@@ -4,7 +4,8 @@
 -- Assume use the default public database in PostgreSQL for both local and Supabase deployment
 
 -- Create SIGMAmed Database
-CREATE DATABASE IF NOT EXISTS "SIGMAmed";
+-- DROP DATABASE IF EXISTS "SIGMAmed";
+-- CREATE DATABASE "SIGMAmed";
 -- Create SIGMAmed Schema
 CREATE SCHEMA IF NOT EXISTS "SIGMAmed";
 
@@ -23,9 +24,9 @@ CREATE TYPE "SIGMAmed".prescription_status_enum AS ENUM ('active', 'completed');
 CREATE TYPE "SIGMAmed".prescribedmedication_status_enum AS ENUM ('active', 'completed','stop');
 CREATE TYPE "SIGMAmed".appointment_status_enum AS ENUM ('scheduled', 'confirmed', 'completed', 'cancelled');
 CREATE TYPE "SIGMAmed".appointment_type_enum AS ENUM ('consultation', 'follow-up');
-CREATE TYPE "SIGMAmed".patient_report_status_enum AS ENUM ('SideEffect', 'Symptom', 'No');
+CREATE TYPE "SIGMAmed".patient_report_status_enum AS ENUM ('SideEffect', 'Symptom');
 CREATE TYPE "SIGMAmed".doctor_level_enum AS ENUM ('primary', 'secondary');
-CREATE TYPE "SIGMAmed".reminder_status_enum AS ENUM ('ignored', 'completed');
+CREATE TYPE "SIGMAmed".reminder_status_enum AS ENUM ('Taken', 'Missed');
 CREATE TYPE "SIGMAmed".admin_level_enum AS ENUM ('super', 'hospital');
 CREATE TYPE "SIGMAmed".weekday_enum AS ENUM ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
 CREATE TYPE "SIGMAmed".dosage_form_enum AS ENUM ('tablet','capsule','syrup','injection');

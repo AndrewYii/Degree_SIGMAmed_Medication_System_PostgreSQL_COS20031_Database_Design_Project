@@ -15,7 +15,7 @@ UPDATE "SIGMAmed"."PatientReport"
 SET
     "Type" = 'Symptom',
     "ReviewTime" = NOW()
-WHERE "PatientReportID" = 'eb526a10-5434-42c3-8481-e367e4833ec8';
+WHERE "PatientReportID" = 'a18a96a3-f642-4206-9e6a-632944cf5e46';
 
 END $$;
 -- Commit transaction

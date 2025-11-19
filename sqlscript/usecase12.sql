@@ -13,12 +13,12 @@ DECLARE
     user_id UUID;
 BEGIN
 -- Select DoctorId based on MedicalLicenseNumber
-    SELECT "UserId" INTO doctor_id FROM "SIGMAmed"."Doctor" WHERE "MedicalLicenseNumber" = 'TEMP-b5bd2cc8-f577-43d9-8018-aaaf67bd17f5';
+    SELECT "UserId" INTO doctor_id FROM "SIGMAmed"."Doctor" WHERE "MedicalLicenseNumber" = 'TEMP-2595018b-69fd-4435-9c8e-3eaa91ef5bae';
 
 -- Select the patient id based on ICPassportNumber
 SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
 
--- Insert the new patient report record inside the patient report table
+-- Insert the new patient report record inside the patient report table (insert raw file directory)
 INSERT INTO "SIGMAmed"."PatientReport" (
     "DoctorId",
     "PatientId",

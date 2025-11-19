@@ -148,7 +148,7 @@ EXECUTE FUNCTION "SIGMAmed".prevent_past_appointments();
 CREATE OR REPLACE FUNCTION "SIGMAmed".notify_new_report()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW."ReviewTime" IS NULL AND NEW."IsProcessed" = FALSE THEN
+    IF NEW."ReviewTime" IS NULL THEN
         PERFORM pg_notify('new_patient_report',NEW."PatientReportID"::text);
     END IF;
 
@@ -165,7 +165,7 @@ EXECUTE FUNCTION "SIGMAmed".notify_new_report();
 CREATE OR REPLACE FUNCTION "SIGMAmed".notify_review_report()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF OLD."ReviewTime" IS NULL AND NEW."ReviewTime" IS NOT NULL AND NEW."IsProcessed" = FALSE THEN
+    IF OLD."ReviewTime" IS NULL AND NEW."ReviewTime" IS NOT NULL THEN
         PERFORM pg_notify('report_ready_for_processing',NEW."PatientReportID"::text);
     END IF;
 

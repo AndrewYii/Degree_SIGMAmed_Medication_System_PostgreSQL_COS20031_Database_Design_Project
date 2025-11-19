@@ -72,14 +72,6 @@ class Extract_keyword:
                 ) VALUES (%s, %s, %s)
             """, (patient_id, symptom, severity))
 
-    # Mark report as processed
-    def mark_processed(self, report_id):
-        self.cursor.execute(f"""
-            UPDATE "{self.schema}"."PatientReport"
-            SET "IsProcessed" = TRUE
-            WHERE "PatientReportID" = %s
-        """, (report_id,))
-
     # Process a single report
     def process_single_report(self, report_id):
         report = self.fetch_single_report(report_id)
@@ -94,8 +86,6 @@ class Extract_keyword:
             self.insert_side_effect(report["PrescribedMedicationId"], keywords, report["Severity"])
         elif report["Type"] == "Symptom":
             self.insert_symptom(report["PatientId"], keywords, report["Severity"])
-
-        self.mark_processed(report_id)
         self.conn.commit()
         print(f"[DONE] Processed report {report_id}")
 

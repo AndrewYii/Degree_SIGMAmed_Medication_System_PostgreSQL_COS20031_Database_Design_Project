@@ -18,8 +18,7 @@ CREATE TABLE "SIGMAmed"."PatientReport" (
     "ReviewTime" TIMESTAMPTZ NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
-    "IsDeleted" BOOLEAN DEFAULT FALSE,
-    "IsProcessed" BOOLEAN DEFAULT FALSE
+    "IsDeleted" BOOLEAN DEFAULT FALSE
 );
 
 COMMENT ON TABLE "SIGMAmed"."PatientReport" IS 'Patient health reports and communications';

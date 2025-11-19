@@ -41,7 +41,7 @@ INSERT INTO "SIGMAmed"."Prescription" (
     "UpdatedAt",
     "CreatedAt"
 ) VALUES (
-    'b5bd2cc8-f577-43d9-8018-aaaf67bd17f5', 
+    '2595018b-69fd-4435-9c8e-3eaa91ef5bae', 
     user_id,                    
     'PRESCRIPTION1-2025-091119',                   
     'active',  
