@@ -12,6 +12,7 @@ CREATE TABLE "SIGMAmed"."PatientSymptom" (
     "MedicalHistoryId" UUID NULL REFERENCES "SIGMAmed"."MedicalHistory"("MedicalHistoryId"),
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId"),
     "SymptomName" VARCHAR(100) NOT NULL,
+    "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),

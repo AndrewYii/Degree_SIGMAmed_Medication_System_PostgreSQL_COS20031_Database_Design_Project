@@ -18,7 +18,7 @@ BEGIN
 -- Select the clinical institution id for Gleaneagles Hospital
     SELECT "ClinicalInstitutionID" INTO clinicalinstitution_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName"='Gleaneagles Hospital' AND "IsDeleted"=FALSE;
 
--- Check whether the newly insert patients already exists
+-- Check whether the newly insert doctors already exists
     IF EXISTS (
         SELECT 1
         FROM "SIGMAmed"."User"

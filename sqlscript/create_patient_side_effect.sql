@@ -25,4 +25,4 @@ COMMENT ON TABLE "SIGMAmed"."PatientSideEffect" IS 'Side effects reported by pat
 -- Commit transaction for Creating Patient Side Effect Table
 COMMIT;
 
--- pse.sideeffectname,pse.severity,pse.onsetdate,pse.patientNotes,pse.resolutiondate
+-- need throw patients notes

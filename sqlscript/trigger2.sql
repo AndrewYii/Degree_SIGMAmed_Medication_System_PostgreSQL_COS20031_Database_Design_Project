@@ -67,3 +67,115 @@ CREATE TRIGGER trigger_auto_create_role_entry
 AFTER INSERT ON "SIGMAmed"."User"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".auto_create_role_entry();
+
+-- TRIGGER: Auto-generate Patient Number
+CREATE OR REPLACE FUNCTION "SIGMAmed".generate_patient_number()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_year TEXT;
+    v_patient_number TEXT;
+    v_counter INT;
+BEGIN
+    -- Generate patient number if it's NULL or empty string
+    IF NEW."PatientNumber" IS NULL OR NEW."PatientNumber" = '' THEN
+        v_year := TO_CHAR(CURRENT_DATE, 'YYYY');
+        
+        -- Get next sequence using pg_advisory_xact_lock for thread safety during bulk inserts
+        PERFORM pg_advisory_xact_lock(hashtext('patient_number_seq_' || v_year));
+        
+        -- Get the maximum sequence number for this year
+        SELECT COALESCE(MAX(
+            CAST(SUBSTRING("PatientNumber" FROM 10 FOR 6) AS INT)
+        ), 0) + 1
+        INTO v_counter
+        FROM "SIGMAmed"."Patient"
+        WHERE "PatientNumber" ~ ('^PAT-' || v_year || '-[0-9]{6}$');
+        
+        v_patient_number := 'PAT-' || v_year || '-' || LPAD(v_counter::TEXT, 6, '0');
+        NEW."PatientNumber" := v_patient_number;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER: Auto-generate Patient Number
+CREATE TRIGGER trigger_generate_patient_number
+BEFORE INSERT ON "SIGMAmed"."Patient"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".generate_patient_number();
+
+-- TRIGGER: Prevent deleting active prescriptions
+CREATE OR REPLACE FUNCTION "SIGMAmed".prevent_delete_active_prescription()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD."Status" = 'active' AND NEW."IsDeleted" = TRUE THEN
+        RAISE EXCEPTION 'Cannot delete active prescription. Please complete or cancel first.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER: Prevent deleting active prescriptions
+CREATE TRIGGER trigger_prevent_delete_active_prescription
+BEFORE UPDATE OF "IsDeleted" ON "SIGMAmed"."Prescription"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".prevent_delete_active_prescription();
+
+-- TRIGGER: Prevent past appointment creation (less the create trigger)
+CREATE OR REPLACE FUNCTION "SIGMAmed".prevent_past_appointments()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW."AppointmentDate" < CURRENT_DATE THEN
+        RAISE EXCEPTION 'Cannot create appointment in the past';
+    END IF;
+    
+    IF NEW."AppointmentDate" = CURRENT_DATE AND NEW."AppointmentTime" < CURRENT_TIME THEN
+        RAISE EXCEPTION 'Cannot create appointment in the past';
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER: Prevent past appointments
+CREATE TRIGGER trigger_prevent_past_appointments
+BEFORE INSERT ON "SIGMAmed"."Appointment"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".prevent_past_appointments();
+
+-- TRIGGER: Notify doctor when new patient reports comes in
+CREATE OR REPLACE FUNCTION "SIGMAmed".notify_new_report()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW."ReviewTime" IS NULL AND NEW."IsProcessed" = FALSE THEN
+        PERFORM pg_notify('new_patient_report',NEW."PatientReportID"::text);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_notify_new_report
+AFTER INSERT ON "SIGMAmed"."PatientReport"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".notify_new_report();
+
+-- TRIGGER: Notify after doctor review
+CREATE OR REPLACE FUNCTION "SIGMAmed".notify_review_report()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD."ReviewTime" IS NULL AND NEW."ReviewTime" IS NOT NULL AND NEW."IsProcessed" = FALSE THEN
+        PERFORM pg_notify('report_ready_for_processing',NEW."PatientReportID"::text);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_notify_type_updated
+AFTER UPDATE ON "SIGMAmed"."PatientReport"
+FOR EACH ROW
+WHEN (NEW."ReviewTime" IS NOT NULL)
+EXECUTE FUNCTION "SIGMAmed".notify_review_report();
+

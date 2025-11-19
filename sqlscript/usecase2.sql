@@ -62,7 +62,6 @@ RETURNING "UserId","Role" INTO new_user_id, new_role;
 
 UPDATE "SIGMAmed"."Patient"
 SET
-    "PatientNumber"='PAT-2025-029999',
     "BloodType" = 'O+',
     "HeightCm" = 175,
     "WeightKg" = 70,

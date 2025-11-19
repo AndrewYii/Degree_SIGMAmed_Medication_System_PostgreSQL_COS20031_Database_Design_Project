@@ -165,59 +165,6 @@ EXECUTE FUNCTION "SIGMAmed".handle_role_change();
 -- FOR EACH ROW
 -- EXECUTE FUNCTION "SIGMAmed".generate_prescription_number();
 
--- TRIGGER: Auto-generate Patient Number
-CREATE OR REPLACE FUNCTION "SIGMAmed".generate_patient_number()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_year TEXT;
-    v_patient_number TEXT;
-    v_counter INT;
-BEGIN
-    -- Generate patient number if it's NULL or empty string
-    IF NEW."PatientNumber" IS NULL OR NEW."PatientNumber" = '' THEN
-        v_year := TO_CHAR(CURRENT_DATE, 'YYYY');
-        
-        -- Get next sequence using pg_advisory_xact_lock for thread safety during bulk inserts
-        PERFORM pg_advisory_xact_lock(hashtext('patient_number_seq_' || v_year));
-        
-        -- Get the maximum sequence number for this year
-        SELECT COALESCE(MAX(
-            CAST(SUBSTRING("PatientNumber" FROM 10 FOR 6) AS INT)
-        ), 0) + 1
-        INTO v_counter
-        FROM "SIGMAmed"."Patient"
-        WHERE "PatientNumber" ~ ('^PAT-' || v_year || '-[0-9]{6}$');
-        
-        v_patient_number := 'PAT-' || v_year || '-' || LPAD(v_counter::TEXT, 6, '0');
-        NEW."PatientNumber" := v_patient_number;
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- TRIGGER: Auto-generate Patient Number
-CREATE TRIGGER trigger_generate_patient_number
-BEFORE INSERT ON "SIGMAmed"."Patient"
-FOR EACH ROW
-EXECUTE FUNCTION "SIGMAmed".generate_patient_number();
-
--- TRIGGER: Prevent deleting active prescriptions
-CREATE OR REPLACE FUNCTION "SIGMAmed".prevent_delete_active_prescription()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD."Status" = 'active' AND NEW."IsDeleted" = TRUE THEN
-        RAISE EXCEPTION 'Cannot delete active prescription. Please complete or cancel first.';
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- TRIGGER: Prevent deleting active prescriptions
-CREATE TRIGGER trigger_prevent_delete_active_prescription
-BEFORE UPDATE OF "IsDeleted" ON "SIGMAmed"."Prescription"
-FOR EACH ROW
-EXECUTE FUNCTION "SIGMAmed".prevent_delete_active_prescription();
 
 -- FUNCTION: Auto-complete prescription when all medications end dates passed
 CREATE OR REPLACE FUNCTION "SIGMAmed".auto_complete_expired_prescriptions()
@@ -303,27 +250,6 @@ BEFORE INSERT OR UPDATE ON "SIGMAmed"."PrescribedMedication"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".check_medication_stock();
 
--- TRIGGER: Prevent past appointment creation
-CREATE OR REPLACE FUNCTION "SIGMAmed".prevent_past_appointments()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW."AppointmentDate" < CURRENT_DATE THEN
-        RAISE EXCEPTION 'Cannot create appointment in the past';
-    END IF;
-    
-    IF NEW."AppointmentDate" = CURRENT_DATE AND NEW."AppointmentTime" < CURRENT_TIME THEN
-        RAISE EXCEPTION 'Cannot create appointment in the past';
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- TRIGGER: Prevent past appointments
-CREATE TRIGGER trigger_prevent_past_appointments
-BEFORE INSERT ON "SIGMAmed"."Appointment"
-FOR EACH ROW
-EXECUTE FUNCTION "SIGMAmed".prevent_past_appointments();
 
 -- TRIGGER: Validate prescribed medication dates
 CREATE OR REPLACE FUNCTION "SIGMAmed".validate_prescribed_medication_dates()
