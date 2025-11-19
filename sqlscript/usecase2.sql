@@ -41,7 +41,8 @@ INSERT INTO "SIGMAmed"."User" (
     "Phone",
     "DateOfBirth",
     "UpdatedAt",
-    "IsDeleted"
+    "IsDeleted",
+    "CreatedAt"
 ) VALUES (
     clinicalinstitution_id, 
     'james.moore101335',                    
@@ -54,7 +55,8 @@ INSERT INTO "SIGMAmed"."User" (
     '(678)421-3453',
     '1969-08-08',
     NOW(),
-    FALSE 
+    FALSE,
+    NOW()
 )
 RETURNING "UserId","Role" INTO new_user_id, new_role;
 

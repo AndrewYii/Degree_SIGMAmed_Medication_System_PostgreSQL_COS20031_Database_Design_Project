@@ -14,6 +14,7 @@ CREATE TABLE "SIGMAmed"."PatientSymptom" (
     "SymptomName" VARCHAR(100) NOT NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE("MedicalHistoryId", "SymptomName")
 );
 
@@ -21,3 +22,4 @@ COMMENT ON TABLE "SIGMAmed"."PatientSymptom" IS 'Symptoms associated with medica
 
 -- Commit transaction for Creating Patient Symptom Table
 COMMIT;
+

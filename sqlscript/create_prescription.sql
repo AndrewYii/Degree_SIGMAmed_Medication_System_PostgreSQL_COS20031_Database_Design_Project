@@ -14,6 +14,7 @@ CREATE TABLE "SIGMAmed"."Prescription" (
     "PrescribedDate" DATE NOT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "ExpiryDate" DATE NOT NULL,
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 

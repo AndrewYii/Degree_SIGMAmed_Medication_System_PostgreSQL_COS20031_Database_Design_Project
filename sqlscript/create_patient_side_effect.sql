@@ -9,13 +9,13 @@ CREATE TABLE "SIGMAmed"."PatientSideEffect" (
     "PatientSideEffectID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescribedMedicationID" UUID NOT NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId") ON DELETE CASCADE,
     "SideEffectName" VARCHAR(100) NOT NULL,
-    "Severity" INT DEFAULT 0,
+    "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
     "OnsetDate" DATE NOT NULL,
     "PatientNotes" TEXT,
     "ResolutionDate" DATE NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
-    CONSTRAINT chk_side_effect_severity CHECK ("Severity" >= 0 AND "Severity" <= 10),
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_side_effect_dates CHECK ("ResolutionDate" IS NULL OR "OnsetDate" <= "ResolutionDate"),
     UNIQUE("PrescribedMedicationID", "SideEffectName")
 );
@@ -24,3 +24,5 @@ COMMENT ON TABLE "SIGMAmed"."PatientSideEffect" IS 'Side effects reported by pat
 
 -- Commit transaction for Creating Patient Side Effect Table
 COMMIT;
+
+-- pse.sideeffectname,pse.severity,pse.onsetdate,pse.patientNotes,pse.resolutiondate

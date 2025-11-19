@@ -16,6 +16,7 @@ CREATE TABLE "SIGMAmed"."PatientReport" (
     "DoctorNote" TEXT NULL,
     "DoseQuantity" DECIMAL(5,2) NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE
 );
 

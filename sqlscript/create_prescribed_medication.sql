@@ -18,6 +18,7 @@ CREATE TABLE "SIGMAmed"."PrescribedMedication" (
     "MedicationNameSnapshot" VARCHAR(100) NOT NULL,
     "TimesPerDay" INT NOT NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE("PrescriptionId", "MedicationId")
 );
 

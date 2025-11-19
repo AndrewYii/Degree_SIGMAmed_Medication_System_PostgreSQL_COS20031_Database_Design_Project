@@ -11,15 +11,16 @@ CREATE TABLE "SIGMAmed"."MedicalHistory" (
     "MedicalHistoryId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
     "DiseaseName" VARCHAR(100) NOT NULL,
-    "Severity" INT DEFAULT 0,
+    "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
     "DiagnosedDate" DATE NOT NULL,
     "ResolutionDate" DATE NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
-    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT chk_severity CHECK ("Severity" >= 0 AND "Severity" <= 10)
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE "SIGMAmed"."MedicalHistory" IS 'Patient medical history and chronic conditions';
 
 -- Commit transaction for Creating Medical History Table
 COMMIT;
+

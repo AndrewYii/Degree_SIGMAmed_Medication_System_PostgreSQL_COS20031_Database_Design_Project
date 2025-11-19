@@ -11,6 +11,7 @@ CREATE TABLE "SIGMAmed"."PrescribedMedicationSchedule" (
     "ReminderTime" TIME NOT NULL,
     "DayOfWeekMask" VARCHAR(7) DEFAULT '0000000',
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "DoseSequenceId" INT NOT NULL
 );
 

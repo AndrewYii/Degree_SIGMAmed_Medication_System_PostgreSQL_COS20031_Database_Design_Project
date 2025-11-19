@@ -13,6 +13,7 @@ CREATE TABLE "SIGMAmed"."AssignedDoctor" (
     "AssignedTime" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE("DoctorId", "PatientId", "DoctorLevel")
 );
 

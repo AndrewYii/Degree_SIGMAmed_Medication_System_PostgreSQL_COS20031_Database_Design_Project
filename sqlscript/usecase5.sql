@@ -32,14 +32,16 @@ INSERT INTO "SIGMAmed"."Medication" (
     "Unit",
     "IsDeleted",
     "UpdatedAt",
-    "DosageForm"
+    "DosageForm",
+    "CreatedAt"
 ) VALUES (
     hospital_id, 
     'Paracetamol (500mg)',                    
     'tablet',                   
     FALSE,  
     NOW(),
-    'tablet'
+    'tablet',
+    NOW()
 );
 
 INSERT INTO "SIGMAmed"."Medication" (
@@ -48,14 +50,16 @@ INSERT INTO "SIGMAmed"."Medication" (
     "Unit",
     "IsDeleted",
     "UpdatedAt",
-    "DosageForm"
+    "DosageForm",
+    "CreatedAt"
 ) VALUES (
     hospital_id, 
     'Lisinopril (10mg)',      
     'tablet',                
     FALSE,  
     NOW(),
-    'tablet'
+    'tablet',
+    NOW()
 );
 
 INSERT INTO "SIGMAmed"."Medication" (
@@ -64,14 +68,16 @@ INSERT INTO "SIGMAmed"."Medication" (
     "Unit",
     "IsDeleted",
     "UpdatedAt",
-    "DosageForm"
+    "DosageForm",
+    "CreatedAt"
 ) VALUES (
     hospital_id, 
     'Hydrochlorothiazide (25mg)',      
     'tablet',                
     FALSE,  
     NOW(),
-    'tablet'
+    'tablet',
+    NOW()
 );
 
 

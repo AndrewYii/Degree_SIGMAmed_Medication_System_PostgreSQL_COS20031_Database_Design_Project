@@ -3,6 +3,8 @@
 -- This script created for the both local development and deployment to Supabase PostgreSQL database
 -- Assume use the default public database in PostgreSQL for both local and Supabase deployment
 
+-- Create SIGMAmed Database
+CREATE DATABASE IF NOT EXISTS "SIGMAmed";
 -- Create SIGMAmed Schema
 CREATE SCHEMA IF NOT EXISTS "SIGMAmed";
 
@@ -27,7 +29,7 @@ CREATE TYPE "SIGMAmed".reminder_status_enum AS ENUM ('ignored', 'completed');
 CREATE TYPE "SIGMAmed".admin_level_enum AS ENUM ('super', 'hospital');
 CREATE TYPE "SIGMAmed".weekday_enum AS ENUM ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
 CREATE TYPE "SIGMAmed".dosage_form_enum AS ENUM ('tablet','capsule','syrup','injection');
-
+CREATE TYPE "SIGMAmed".severity_enum AS ENUM ('mild','moderate','severe','life_threatening');
 -- Create Types for Alerts and Notifications
 -- CREATE TYPE "SIGMAmed".alert_severity_enum AS ENUM ('low', 'medium', 'high', 'critical');
 -- CREATE TYPE "SIGMAmed".alert_status_enum AS ENUM ('pending', 'acknowledged', 'resolved', 'ignored');

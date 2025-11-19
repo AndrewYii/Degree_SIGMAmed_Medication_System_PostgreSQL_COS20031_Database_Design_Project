@@ -15,6 +15,7 @@ CREATE TABLE "SIGMAmed"."Medication" (
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "DosageForm" "SIGMAmed".dosage_form_enum,
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE("ClinicalInstitutionID", "MedicationName")
 );
 

@@ -38,7 +38,8 @@ INSERT INTO "SIGMAmed"."Prescription" (
     "PrescribedDate",
     "ExpiryDate",
     "IsDeleted",
-    "UpdatedAt"
+    "UpdatedAt",
+    "CreatedAt"
 ) VALUES (
     'b5bd2cc8-f577-43d9-8018-aaaf67bd17f5', 
     user_id,                    
@@ -47,6 +48,7 @@ INSERT INTO "SIGMAmed"."Prescription" (
     '2025-01-05',
     '2025-02-05',
     FALSE,
+    NOW(),
     NOW()
 )
 RETURNING "PrescriptionId" INTO prescription_id;
@@ -68,7 +70,8 @@ INSERT INTO "SIGMAmed"."PrescribedMedication" (
     "IsDeleted",
     "MedicationNameSnapshot",
     "TimesPerDay",
-    "UpdatedAt"
+    "UpdatedAt",
+    "CreatedAt"
 )
 VALUES (
     prescription_id,
@@ -81,6 +84,7 @@ VALUES (
     FALSE,     
     'Lisinopril (10mg)',   
     3,
+    NOW(),
     NOW()                     
 )
 RETURNING "PrescribedMedicationId" INTO new_pm1_id;
@@ -96,7 +100,8 @@ INSERT INTO "SIGMAmed"."PrescribedMedication" (
     "IsDeleted",
     "MedicationNameSnapshot",
     "TimesPerDay",
-    "UpdatedAt"
+    "UpdatedAt",
+    "CreatedAt"
 )
 VALUES (
     prescription_id,
@@ -109,6 +114,7 @@ VALUES (
     FALSE,     
     'Hydrochlorothiazide (25mg)',   
     1,
+    NOW(),
     NOW()                     
 )
 RETURNING "PrescribedMedicationId" INTO new_pm2_id;
@@ -119,7 +125,8 @@ INSERT INTO "SIGMAmed"."PrescribedMedicationSchedule" (
     "ReminderTime",
     "DayOfWeekMask",
     "UpdatedAt",
-    "DoseSequenceId"
+    "DoseSequenceId",
+    "CreatedAt"
 )
 VALUES
 (
@@ -127,7 +134,8 @@ VALUES
     '08:00:00',
     '1111111',
     NOW(),
-    1
+    1,
+    NOW()
 ),
 
 (
@@ -135,7 +143,8 @@ VALUES
     '14:00:00',
     '1111111',
     NOW(),
-    2
+    2,
+    NOW()
 ),
 
 (
@@ -143,7 +152,8 @@ VALUES
     '20:00:00',
     '1111111',
     NOW(),
-    3
+    3,
+    NOW()
 ),
 
 (
@@ -151,7 +161,8 @@ VALUES
     '08:00:00',
     '1111111',
     NOW(),
-    1
+    1,
+    NOW()
 );
 
 END $$;

@@ -11,7 +11,8 @@ CREATE TABLE "SIGMAmed"."Reminder" (
     "IsActive" BOOLEAN DEFAULT TRUE,
     "CurrentStatus" "SIGMAmed".reminder_status_enum NOT NULL,
     "RemindGap" INTERVAL NULL,
-    "UpdatedAt" TIMESTAMPTZ DEFAULT NULL
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NULL,
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE "SIGMAmed"."Reminder" IS 'Medication intake reminders for patients';

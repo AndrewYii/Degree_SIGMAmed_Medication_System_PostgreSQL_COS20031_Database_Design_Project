@@ -53,7 +53,8 @@ BEGIN
             "Phone",
             "DateOfBirth",
             "UpdatedAt",
-            "IsDeleted"
+            "IsDeleted",
+            "CreatedAt"
         ) VALUES (
             new_hospital_id, 
             'jaome.moore101335',                    
@@ -66,7 +67,8 @@ BEGIN
             '(678)145-6435',
             '1970-05-20',
             NOW(),
-            FALSE 
+            FALSE,
+            NOW()
         )
         RETURNING "UserId","Role" INTO new_user_id, new_role;
     ELSIF admin_exists THEN

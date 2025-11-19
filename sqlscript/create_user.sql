@@ -19,8 +19,9 @@ CREATE TABLE "SIGMAmed"."User" (
     "LastName" VARCHAR(100) NOT NULL,
     "Phone" VARCHAR(20) NOT NULL,
     "DateOfBirth" DATE NOT NULL,
-    "UpdatedAt" TIMESTAMPTZ DEFAULT NULL,
+    "UpdatedAt" TIMESTAMPTZ DEFAULT NULL, 
     "IsDeleted" BOOLEAN DEFAULT FALSE,
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_user_age CHECK (DATE_PART('year', AGE("DateOfBirth")) >= 0),
     CONSTRAINT chk_email_format CHECK ("Email" ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );

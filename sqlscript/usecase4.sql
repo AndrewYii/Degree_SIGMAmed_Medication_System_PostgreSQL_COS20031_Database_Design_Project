@@ -3,8 +3,6 @@ SET search_path TO "SIGMAmed", public;
 
 -- Ensure uuid-ossp extension is available (for UUIDs)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
--- Used for hash the password
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Start transaction
 BEGIN;
