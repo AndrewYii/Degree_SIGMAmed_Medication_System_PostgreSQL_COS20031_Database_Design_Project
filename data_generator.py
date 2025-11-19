@@ -8,44 +8,190 @@ Faker.seed(42)
 random.seed(42)
 
 class SIGMAmedDataGenerator:    
-    # Medical data constants
+    # Medical data constants - Expanded for realistic 100K+ scenarios
     SPECIALIZATIONS = [
         'Cardiology', 'Dermatology', 'Endocrinology', 'Gastroenterology',
         'Hematology', 'Neurology', 'Oncology', 'Orthopedics',
-        'Pediatrics', 'Psychiatry', 'Radiology', 'General Practice'
+        'Pediatrics', 'Psychiatry', 'Radiology', 'General Practice',
+        'Internal Medicine', 'Family Medicine', 'Emergency Medicine',
+        'Anesthesiology', 'Pathology', 'Surgery', 'Ophthalmology',
+        'Obstetrics and Gynecology', 'Urology', 'Nephrology', 'Pulmonology',
+        'Rheumatology', 'Allergy and Immunology', 'Infectious Disease',
+        'Geriatrics', 'Sports Medicine', 'Physical Medicine', 'Pain Management'
     ]
     
     BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
     
+    HOSPITAL_TYPES = [
+        'General Hospital', 'Medical Center', 'Health Clinic', 'Community Hospital',
+        'Regional Medical Center', 'University Hospital', 'Children\'s Hospital',
+        'Cancer Center', 'Heart Institute', 'Orthopedic Center', 'Rehabilitation Center',
+        'Surgical Hospital', 'Women\'s Hospital', 'Psychiatric Hospital', 'Specialty Clinic'
+    ]
+    
+    DOSAGE_FORMS = ['tablet', 'capsule', 'syrup', 'injection']  # Must match dosage_form_enum in DB
+    
+    # 200+ Common Medications
     MEDICATIONS = [
-        'Amoxicillin', 'Metformin', 'Lisinopril', 'Atorvastatin',
-        'Levothyroxine', 'Omeprazole', 'Amlodipine', 'Simvastatin',
-        'Losartan', 'Gabapentin', 'Hydrochlorothiazide', 'Metoprolol',
-        'Albuterol', 'Ibuprofen', 'Acetaminophen', 'Aspirin',
-        'Prednisone', 'Azithromycin', 'Ciprofloxacin', 'Pantoprazole'
+        # Cardiovascular
+        'Lisinopril', 'Amlodipine', 'Metoprolol', 'Losartan', 'Atorvastatin',
+        'Simvastatin', 'Carvedilol', 'Furosemide', 'Warfarin', 'Clopidogrel',
+        'Digoxin', 'Diltiazem', 'Verapamil', 'Enalapril', 'Ramipril',
+        # Diabetes
+        'Metformin', 'Insulin Glargine', 'Insulin Lispro', 'Glipizide', 'Glyburide',
+        'Sitagliptin', 'Pioglitazone', 'Empagliflozin', 'Dulaglutide',
+        # Antibiotics
+        'Amoxicillin', 'Azithromycin', 'Ciprofloxacin', 'Doxycycline', 'Cephalexin',
+        'Levofloxacin', 'Clindamycin', 'Trimethoprim-Sulfamethoxazole', 'Penicillin',
+        'Ampicillin', 'Ceftriaxone', 'Meropenem', 'Vancomycin', 'Clarithromycin',
+        # Pain & Inflammation
+        'Ibuprofen', 'Acetaminophen', 'Aspirin', 'Naproxen', 'Celecoxib',
+        'Tramadol', 'Morphine', 'Oxycodone', 'Hydrocodone', 'Codeine',
+        'Diclofenac', 'Meloxicam', 'Indomethacin', 'Ketorolac',
+        # Gastrointestinal
+        'Omeprazole', 'Pantoprazole', 'Esomeprazole', 'Ranitidine', 'Famotidine',
+        'Lansoprazole', 'Ondansetron', 'Metoclopramide', 'Loperamide', 'Bisacodyl',
+        # Respiratory
+        'Albuterol', 'Fluticasone', 'Montelukast', 'Budesonide', 'Ipratropium',
+        'Salmeterol', 'Tiotropium', 'Theophylline', 'Cetirizine', 'Loratadine',
+        'Fexofenadine', 'Diphenhydramine', 'Pseudoephedrine', 'Guaifenesin',
+        # Mental Health
+        'Sertraline', 'Fluoxetine', 'Escitalopram', 'Citalopram', 'Paroxetine',
+        'Venlafaxine', 'Duloxetine', 'Bupropion', 'Mirtazapine', 'Trazodone',
+        'Amitriptyline', 'Nortriptyline', 'Alprazolam', 'Lorazepam', 'Clonazepam',
+        'Diazepam', 'Zolpidem', 'Aripiprazole', 'Quetiapine', 'Risperidone',
+        'Olanzapine', 'Lithium', 'Valproate', 'Lamotrigine', 'Carbamazepine',
+        # Endocrine
+        'Levothyroxine', 'Methimazole', 'Prednisone', 'Prednisolone', 'Hydrocortisone',
+        'Dexamethasone', 'Testosterone', 'Estradiol', 'Progesterone', 'Levonorgestrel',
+        # Neurological
+        'Gabapentin', 'Pregabalin', 'Levetiracetam', 'Phenytoin', 'Topiramate',
+        'Memantine', 'Donepezil', 'Rivastigmine', 'Baclofen', 'Cyclobenzaprine',
+        'Tizanidine', 'Sumatriptan', 'Rizatriptan',
+        # Urological
+        'Tamsulosin', 'Finasteride', 'Dutasteride', 'Oxybutynin', 'Tolterodine',
+        'Sildenafil', 'Tadalafil',
+        # Hematological
+        'Apixaban', 'Rivaroxaban', 'Dabigatran', 'Enoxaparin', 'Heparin',
+        'Ferrous Sulfate', 'Folic Acid', 'Vitamin B12', 'Epoetin Alfa',
+        # Dermatological
+        'Hydrocortisone Cream', 'Triamcinolone', 'Betamethasone', 'Clotrimazole',
+        'Ketoconazole', 'Mupirocin', 'Tretinoin', 'Benzoyl Peroxide', 'Tacrolimus',
+        # Ophthalmological
+        'Latanoprost', 'Timolol', 'Brimonidine', 'Dorzolamide', 'Prednisolone Eye Drops',
+        # Others
+        'Vitamin D', 'Calcium Carbonate', 'Multivitamin', 'Potassium Chloride',
+        'Sodium Chloride', 'Lactobacillus', 'Magnesium', 'Zinc', 'Omega-3'
     ]
     
+    # 100+ Diseases
     DISEASES = [
-        'Hypertension', 'Type 2 Diabetes', 'Asthma', 'Arthritis',
-        'Depression', 'Anxiety', 'Migraine', 'GERD',
-        'High Cholesterol', 'Hypothyroidism', 'Osteoporosis', 'COPD'
+        # Cardiovascular
+        'Hypertension', 'Coronary Artery Disease', 'Heart Failure', 'Atrial Fibrillation',
+        'Myocardial Infarction', 'Angina Pectoris', 'Cardiomyopathy', 'Peripheral Artery Disease',
+        'Deep Vein Thrombosis', 'Pulmonary Embolism', 'Hyperlipidemia', 'Atherosclerosis',
+        # Endocrine/Metabolic
+        'Type 1 Diabetes', 'Type 2 Diabetes', 'Hypothyroidism', 'Hyperthyroidism',
+        'Metabolic Syndrome', 'Obesity', 'Osteoporosis', 'Gout', 'Hypercholesterolemia',
+        'Cushing Syndrome', 'Addison Disease', 'Polycystic Ovary Syndrome',
+        # Respiratory
+        'Asthma', 'COPD', 'Pneumonia', 'Bronchitis', 'Tuberculosis', 'Pulmonary Fibrosis',
+        'Sleep Apnea', 'Allergic Rhinitis', 'Sinusitis', 'Emphysema',
+        # Gastrointestinal
+        'GERD', 'Peptic Ulcer Disease', 'Inflammatory Bowel Disease', 'Crohn Disease',
+        'Ulcerative Colitis', 'Irritable Bowel Syndrome', 'Gastritis', 'Diverticulitis',
+        'Cirrhosis', 'Hepatitis B', 'Hepatitis C', 'Pancreatitis', 'Celiac Disease',
+        # Neurological
+        'Migraine', 'Epilepsy', 'Parkinson Disease', 'Alzheimer Disease', 'Multiple Sclerosis',
+        'Stroke', 'Transient Ischemic Attack', 'Peripheral Neuropathy', 'Restless Leg Syndrome',
+        'Essential Tremor', 'Dementia', 'Meningitis', 'Encephalitis',
+        # Psychiatric
+        'Depression', 'Anxiety Disorder', 'Bipolar Disorder', 'Schizophrenia',
+        'PTSD', 'OCD', 'Panic Disorder', 'Social Anxiety Disorder', 'ADHD',
+        'Insomnia', 'Generalized Anxiety Disorder',
+        # Musculoskeletal
+        'Osteoarthritis', 'Rheumatoid Arthritis', 'Fibromyalgia', 'Lupus', 'Ankylosing Spondylitis',
+        'Psoriatic Arthritis', 'Polymyalgia Rheumatica', 'Tendinitis', 'Bursitis',
+        'Carpal Tunnel Syndrome', 'Herniated Disc', 'Scoliosis',
+        # Renal/Urological
+        'Chronic Kidney Disease', 'Acute Kidney Injury', 'Nephrotic Syndrome', 'UTI',
+        'Benign Prostatic Hyperplasia', 'Kidney Stones', 'Bladder Cancer', 'Prostate Cancer',
+        'Urinary Incontinence', 'Interstitial Cystitis',
+        # Hematological
+        'Anemia', 'Iron Deficiency Anemia', 'Vitamin B12 Deficiency', 'Thrombocytopenia',
+        'Leukemia', 'Lymphoma', 'Sickle Cell Disease', 'Hemophilia', 'Polycythemia Vera',
+        # Dermatological
+        'Eczema', 'Psoriasis', 'Acne Vulgaris', 'Rosacea', 'Dermatitis', 'Vitiligo',
+        'Melanoma', 'Basal Cell Carcinoma', 'Fungal Infection', 'Herpes Zoster',
+        # Infectious
+        'Influenza', 'COVID-19', 'HIV/AIDS', 'Malaria', 'Dengue Fever', 'Sepsis',
+        # Oncological
+        'Lung Cancer', 'Breast Cancer', 'Colorectal Cancer', 'Pancreatic Cancer',
+        'Ovarian Cancer', 'Thyroid Cancer',
+        # Other
+        'Glaucoma', 'Cataracts', 'Macular Degeneration', 'Hearing Loss', 'Tinnitus'
     ]
     
+    # 100+ Symptoms
     SYMPTOMS = [
-        'Headache', 'Fatigue', 'Dizziness', 'Nausea',
-        'Chest Pain', 'Shortness of Breath', 'Joint Pain', 'Fever',
-        'Cough', 'Abdominal Pain', 'Back Pain', 'Insomnia'
+        # General
+        'Fatigue', 'Fever', 'Chills', 'Night Sweats', 'Weight Loss', 'Weight Gain',
+        'Malaise', 'Weakness', 'Loss of Appetite', 'Excessive Thirst', 'Frequent Urination',
+        # Pain
+        'Headache', 'Migraine', 'Chest Pain', 'Abdominal Pain', 'Back Pain', 'Joint Pain',
+        'Muscle Pain', 'Neck Pain', 'Pelvic Pain', 'Bone Pain', 'Burning Pain',
+        # Cardiovascular
+        'Palpitations', 'Rapid Heartbeat', 'Irregular Heartbeat', 'Leg Swelling',
+        'Ankle Swelling', 'Cyanosis', 'Cold Extremities',
+        # Respiratory
+        'Shortness of Breath', 'Cough', 'Wheezing', 'Chest Tightness', 'Hemoptysis',
+        'Nasal Congestion', 'Runny Nose', 'Sore Throat', 'Hoarseness',
+        # Gastrointestinal
+        'Nausea', 'Vomiting', 'Diarrhea', 'Constipation', 'Bloating', 'Gas',
+        'Heartburn', 'Indigestion', 'Difficulty Swallowing', 'Blood in Stool',
+        'Black Tarry Stools', 'Loss of Bowel Control', 'Abdominal Cramping',
+        # Neurological
+        'Dizziness', 'Vertigo', 'Confusion', 'Memory Loss', 'Difficulty Concentrating',
+        'Tremor', 'Seizures', 'Numbness', 'Tingling', 'Vision Changes', 'Blurred Vision',
+        'Double Vision', 'Hearing Loss', 'Tinnitus', 'Loss of Balance', 'Coordination Problems',
+        # Psychiatric
+        'Anxiety', 'Depression', 'Mood Swings', 'Irritability', 'Restlessness',
+        'Insomnia', 'Excessive Sleepiness', 'Hallucinations', 'Panic Attacks',
+        # Musculoskeletal
+        'Stiffness', 'Swelling', 'Redness', 'Limited Range of Motion', 'Muscle Spasms',
+        'Muscle Weakness', 'Difficulty Walking', 'Limping',
+        # Dermatological
+        'Rash', 'Itching', 'Dry Skin', 'Hives', 'Skin Discoloration', 'Bruising',
+        'Hair Loss', 'Nail Changes',
+        # Urological
+        'Painful Urination', 'Blood in Urine', 'Urinary Urgency', 'Urinary Frequency',
+        'Difficulty Starting Urination', 'Weak Urine Stream', 'Incontinence',
+        # Other
+        'Hot Flashes', 'Excessive Sweating', 'Sensitivity to Light', 'Sensitivity to Sound',
+        'Mouth Sores', 'Dry Mouth', 'Bad Taste', 'Swollen Lymph Nodes'
     ]
     
+    # 50+ Side Effects
     SIDE_EFFECTS = [
-        'Nausea', 'Dizziness', 'Drowsiness', 'Dry Mouth',
-        'Headache', 'Constipation', 'Diarrhea', 'Fatigue',
-        'Insomnia', 'Rash', 'Upset Stomach', 'Blurred Vision'
+        'Nausea', 'Vomiting', 'Diarrhea', 'Constipation', 'Abdominal Pain',
+        'Dizziness', 'Drowsiness', 'Fatigue', 'Headache', 'Insomnia',
+        'Dry Mouth', 'Increased Thirst', 'Loss of Appetite', 'Weight Gain', 'Weight Loss',
+        'Rash', 'Itching', 'Hives', 'Swelling', 'Redness',
+        'Blurred Vision', 'Eye Irritation', 'Sensitivity to Light',
+        'Tremor', 'Muscle Pain', 'Joint Pain', 'Weakness', 'Numbness',
+        'Anxiety', 'Nervousness', 'Restlessness', 'Mood Changes', 'Depression',
+        'Palpitations', 'Increased Heart Rate', 'Low Blood Pressure', 'High Blood Pressure',
+        'Shortness of Breath', 'Cough', 'Nasal Congestion',
+        'Upset Stomach', 'Heartburn', 'Gas', 'Bloating',
+        'Urinary Frequency', 'Urinary Retention', 'Dark Urine',
+        'Sweating', 'Flushing', 'Chills', 'Hot Flashes',
+        'Hair Loss', 'Skin Discoloration', 'Bruising', 'Bleeding'
     ]
     
     ALLERGIES = [
-        'Penicillin', 'Sulfa Drugs', 'Aspirin', 'Ibuprofen',
-        'Codeine', 'Morphine', 'NSAIDs', 'Latex'
+        'Penicillin', 'Sulfa Drugs', 'Aspirin', 'Ibuprofen', 'Codeine', 'Morphine',
+        'NSAIDs', 'Latex', 'Cephalosporins', 'Tetracycline', 'Vancomycin',
+        'Contrast Dye', 'Local Anesthetics', 'Eggs', 'Shellfish'
     ]
     
     WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -54,14 +200,43 @@ class SIGMAmedDataGenerator:
         self.fake = fake
     
     def generate_clinical_institution(self, count=1):
+        """Generate unique clinical institutions with diverse, realistic names"""
         institutions = []
+        used_names = set()
+        
         for i in range(count):
-            name = f"{fake.city()} {random.choice(['General Hospital', 'Medical Center', 'Health Clinic', 'Community Hospital'])}"
-            institutions.append({
-                'ClinicalInstitutionName': name,
-                'Description': f"A leading healthcare facility providing comprehensive medical services in {fake.city()}.",
-                'IsDeleted': False
-            })
+            # Generate unique names to avoid duplicates
+            attempts = 0
+            while attempts < 10:
+                city = fake.city()
+                hospital_type = random.choice(self.HOSPITAL_TYPES)
+                
+                # Add variety with different naming patterns
+                naming_pattern = random.choice([
+                    f"{city} {hospital_type}",
+                    f"{fake.last_name()} {hospital_type}",
+                    f"St. {fake.first_name()}'s {hospital_type}",
+                    f"{city} {fake.last_name()} {hospital_type}",
+                    f"Mount {fake.last_name()} {hospital_type}"
+                ])
+                
+                if naming_pattern not in used_names:
+                    used_names.add(naming_pattern)
+                    institutions.append({
+                        'ClinicalInstitutionName': naming_pattern[:100],  # Respect 100 char limit
+                        'IsDeleted': False
+                    })
+                    break
+                attempts += 1
+            
+            # Fallback if all patterns taken
+            if attempts == 10:
+                fallback_name = f"{city} Medical Facility {i+1:06d}"
+                institutions.append({
+                    'ClinicalInstitutionName': fallback_name,
+                    'IsDeleted': False
+                })
+        
         return institutions
     
     def generate_user(self, institution_id, role='patient', count=1):
@@ -91,13 +266,63 @@ class SIGMAmedDataGenerator:
         return users
     
     def generate_doctor(self, user_id):
+        # Ensure good distribution across specializations
+        # Weight common specializations higher for realism
+        specialization_weights = {
+            'General Practice': 15,
+            'Internal Medicine': 12,
+            'Family Medicine': 12,
+            'Pediatrics': 10,
+            'Surgery': 8,
+            'Cardiology': 6,
+            'Orthopedics': 5,
+            'Emergency Medicine': 5,
+            'Anesthesiology': 4,
+            'Obstetrics and Gynecology': 4,
+            'Psychiatry': 3,
+            'Dermatology': 3,
+            'Radiology': 2,
+            'Neurology': 2,
+            'Oncology': 2,
+            'Endocrinology': 1,
+            'Gastroenterology': 1,
+            'Hematology': 1,
+            'Nephrology': 1,
+            'Pulmonology': 1,
+            'Rheumatology': 1,
+            'Urology': 1,
+            'Ophthalmology': 1,
+            'Allergy and Immunology': 1,
+            'Infectious Disease': 1,
+            'Geriatrics': 1,
+            'Sports Medicine': 1,
+            'Physical Medicine': 1,
+            'Pain Management': 1,
+            'Pathology': 1
+        }
+        
+        # Use weighted random choice
+        specializations = list(specialization_weights.keys())
+        weights = list(specialization_weights.values())
+        specialization = random.choices(specializations, weights=weights, k=1)[0]
+        
+        # Generate realistic years of experience
+        # Junior doctors: 1-5 years (30%)
+        # Mid-level: 6-15 years (40%)
+        # Senior: 16-35 years (30%)
+        rand = random.random()
+        if rand < 0.3:
+            years = random.randint(1, 5)
+        elif rand < 0.7:
+            years = random.randint(6, 15)
+        else:
+            years = random.randint(16, 35)
+        
         return {
             'UserId': user_id,
             'MedicalLicenseNumber': f"MD-{fake.bothify(text='####-####', letters='0123456789')}",
-            'Specialization': random.choice(self.SPECIALIZATIONS),
-            'YearOfExperience': random.randint(1, 35),
-            'MedicalSchool': f"{fake.city()} Medical School",
-            'Bio': fake.text(max_nb_chars=200)
+            'Specialization': specialization,
+            'YearOfExperience': years
         }
     
     def generate_patient(self, user_id):
@@ -109,32 +334,50 @@ class SIGMAmedDataGenerator:
             'UserId': user_id,
             'PatientNumber': '',  # Will be auto-generated by trigger
             'BloodType': random.choice(self.BLOOD_TYPES) if random.random() > 0.1 else None,
-            'HeightCm': round(random.uniform(150.0, 200.0), 2) if random.random() > 0.2 else None,
-            'WeightKg': round(random.uniform(45.0, 120.0), 2) if random.random() > 0.2 else None,
-            'EmergencyContactName': fake.name() if random.random() > 0.1 else None,
-            'EmergencyContactNumber': fake.phone_number()[:20] if random.random() > 0.1 else None,
+            'HeightCm': round(random.uniform(150.0, 200.0), 2),  # NOT NULL - always provide
+            'WeightKg': round(random.uniform(45.0, 120.0), 2),    # NOT NULL - always provide
+            'EmergencyContactName': fake.name(),  # NOT NULL - always provide
+            'EmergencyContactNumber': fake.phone_number()[:20],  # NOT NULL - always provide
             'MedicationAllergies': json.dumps(allergies)
         }
     
     def generate_admin(self, user_id):
         return {
             'UserId': user_id,
-            'AdminLevel': random.choice(['super', 'hospital'])
+            'AdminLevel': 'hospital'  # Only hospital-level admins, super admin created separately
         }
     
     def generate_medication(self, institution_id, count=None):
-        # If count not specified, use all medications
-        meds_to_use = random.sample(self.MEDICATIONS, count) if count else self.MEDICATIONS
+        """Generate medications with dosage forms and realistic amounts"""
+        # If count not specified, use random subset
+        if count:
+            meds_to_use = random.sample(self.MEDICATIONS, min(count, len(self.MEDICATIONS)))
+        else:
+            meds_to_use = random.sample(self.MEDICATIONS, random.randint(10, 50))
         
         medications = []
         for med_name in meds_to_use:
+            dosage_form = random.choice(self.DOSAGE_FORMS)
+            unit = self._get_unit_for_dosage_form(dosage_form)
+            
             medications.append({
                 'ClinicalInstitutionID': institution_id,
                 'MedicationName': med_name,
-                'TotalAmount': random.randint(50, 500),
+                'Unit': unit,
+                'DosageForm': dosage_form,
                 'IsDeleted': False
             })
         return medications
+    
+    def _get_unit_for_dosage_form(self, dosage_form):
+        """Return appropriate unit for dosage form"""
+        unit_mapping = {
+            'tablet': 'mg',
+            'capsule': 'mg',
+            'syrup': 'ml',
+            'injection': 'ml'
+        }
+        return unit_mapping.get(dosage_form, 'mg')
     
     def generate_assigned_doctor(self, doctor_id, patient_id, level='primary'):
         return {
@@ -155,7 +398,7 @@ class SIGMAmedDataGenerator:
             histories.append({
                 'PatientId': patient_id,
                 'DiseaseName': disease,
-                'Severity': random.randint(1, 10),
+                'Severity': random.choice(['mild', 'moderate', 'severe', 'life_threatening']),
                 'IsDeleted': False
             })
         return histories
@@ -289,7 +532,7 @@ class SIGMAmedDataGenerator:
         return {
             'PrescribedMedicationID': prescribed_medication_id,
             'SideEffectName': random.choice(self.SIDE_EFFECTS),
-            'Severity': random.randint(1, 10),
+            'Severity': random.choice(['mild', 'moderate', 'severe', 'life_threatening']),
             'OnsetDate': onset_date,
             'PatientNotes': fake.sentence() if random.random() > 0.5 else None,
             'ResolutionDate': resolution_date
@@ -299,7 +542,7 @@ class SIGMAmedDataGenerator:
         return {
             'DoctorId': doctor_id,
             'PatientId': patient_id,
-            'Status': random.choice(['Appointment', 'SideEffect', 'Symptom', 'No']),
+            'Status': random.choice(['SideEffect', 'Symptom', 'No']),
             'Reason': fake.sentence() if random.random() > 0.3 else None,
             'AttachmentDirectory': None,
             'IsDeleted': False
