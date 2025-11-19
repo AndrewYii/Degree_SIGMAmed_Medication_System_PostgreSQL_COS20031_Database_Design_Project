@@ -19,7 +19,6 @@ CREATE TABLE "SIGMAmed"."User" (
     "LastName" VARCHAR(100) NOT NULL,
     "Phone" VARCHAR(20) NOT NULL,
     "DateOfBirth" DATE NOT NULL,
-    "FcmKey" VARCHAR(255),
     "UpdatedAt" TIMESTAMPTZ DEFAULT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     CONSTRAINT chk_user_age CHECK (DATE_PART('year', AGE("DateOfBirth")) >= 0),
@@ -28,7 +27,6 @@ CREATE TABLE "SIGMAmed"."User" (
 
 COMMENT ON TABLE "SIGMAmed"."User" IS 'Central user table for all system users (doctors, patients, admins)';
 COMMENT ON COLUMN "SIGMAmed"."User"."PasswordHash" IS 'Bcrypt hashed password - never store plaintext';
-COMMENT ON COLUMN "SIGMAmed"."User"."FcmKey" IS 'Firebase Cloud Messaging token for push notifications';
 
 -- Commit transaction for Creating User Table
 COMMIT;

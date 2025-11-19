@@ -13,7 +13,8 @@ CREATE TABLE "SIGMAmed"."PatientReport" (
     "Type" "SIGMAmed".patient_report_status_enum NOT NULL,
     "Reason" TEXT,
     "AttachmentDirectory" TEXT NULL,
-    "Status" "SIGMAmed".report_status_enum DEFAULT "pending",
+    "DoctorNote" TEXT NULL,
+    "DoseQuantity" DECIMAL(5,2) NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE
 );

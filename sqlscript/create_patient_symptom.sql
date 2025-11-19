@@ -13,6 +13,7 @@ CREATE TABLE "SIGMAmed"."PatientSymptom" (
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId"),
     "SymptomName" VARCHAR(100) NOT NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "IsDeleted" BOOLEAN DEFAULT FALSE,
     UNIQUE("MedicalHistoryId", "SymptomName")
 );
 

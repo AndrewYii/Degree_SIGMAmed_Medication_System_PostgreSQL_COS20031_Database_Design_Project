@@ -12,8 +12,8 @@ CREATE TABLE "SIGMAmed"."AuditLog" (
     "TableName" VARCHAR(75) NOT NULL,
     "RecordId" UUID NOT NULL,
     "ActionStatus" action_type_enum NOT NULL,
-    "OldValue" JSONB DEFAULT[],
-    "NewValue" JSONB DEFAULT[]
+    "OldValue" JSONB DEFAULT '[]'::jsonb,
+    "NewValue" JSONB DEFAULT '[]'::jsonb
 );
 
 

@@ -14,6 +14,7 @@ CREATE TABLE "SIGMAmed"."PatientSideEffect" (
     "PatientNotes" TEXT,
     "ResolutionDate" DATE NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
+    "IsDeleted" BOOLEAN DEFAULT FALSE,
     CONSTRAINT chk_side_effect_severity CHECK ("Severity" >= 0 AND "Severity" <= 10),
     CONSTRAINT chk_side_effect_dates CHECK ("ResolutionDate" IS NULL OR "OnsetDate" <= "ResolutionDate"),
     UNIQUE("PrescribedMedicationID", "SideEffectName")

@@ -11,10 +11,10 @@ CREATE TABLE "SIGMAmed"."Medication" (
     "MedicationID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "ClinicalInstitutionID" UUID NOT NULL REFERENCES "SIGMAmed"."ClinicalInstitution"("ClinicalInstitutionID") ON DELETE SET NULL,
     "MedicationName" VARCHAR(100) NOT NULL,
-    "TotalAmount" INT NULL,
+    "Unit" VARCHAR(50) NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT chk_total_amount CHECK ("TotalAmount" >= 0),
+    "DosageForm" "SIGMAmed".dosage_form_enum,
     UNIQUE("ClinicalInstitutionID", "MedicationName")
 );
 
@@ -22,3 +22,4 @@ COMMENT ON TABLE "SIGMAmed"."Medication" IS 'Medication inventory per clinical i
 
 -- Commit transaction for Creating Medication Table
 COMMIT;
+
