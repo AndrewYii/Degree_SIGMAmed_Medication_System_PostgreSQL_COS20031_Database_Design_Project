@@ -6,7 +6,7 @@ BEGIN;
 
 CREATE TABLE "SIGMAmed"."PatientCareTeam" (
     -- for supabase, need to use extensions.uuid_generate_v4()
-    "AssignedDoctorId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "PatientCareTeamId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "DoctorId" UUID NOT NULL REFERENCES "SIGMAmed"."Doctor"("UserId") ON DELETE CASCADE,
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
     "DoctorLevel" "SIGMAmed".doctor_level_enum NOT NULL,
