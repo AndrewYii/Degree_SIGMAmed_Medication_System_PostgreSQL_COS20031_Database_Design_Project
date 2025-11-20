@@ -13,6 +13,7 @@ DECLARE
     prescribedmedication_id UUID;
     sequence_id INT;
 BEGIN
+-- Select the DoseSequenceId and PrescribedMedicationId from old record
 SELECT "DoseSequenceId","PrescribedMedicationId" INTO sequence_id, prescribedmedication_id FROM "SIGMAmed"."PrescribedMedicationSchedule" WHERE "PrescribedMedicationScheduleId" = '90552c95-7cdb-4c09-84b7-f4804048813e';
 
 -- Update the schedule’s day-of-week mask

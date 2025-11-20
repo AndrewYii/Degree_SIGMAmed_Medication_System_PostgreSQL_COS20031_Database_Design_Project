@@ -6,7 +6,7 @@ BEGIN;
 
 CREATE TABLE "SIGMAmed"."AppointmentReminder" (
     "AppointmentReminderID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "AppointmnetID" UUID NULL REFERENCES "SIGMAmed"."Appointment"("AppointmentId"),
+    "AppointmentID" UUID NULL REFERENCES "SIGMAmed"."Appointment"("AppointmentId"),
     "ScheduledTime" TIMESTAMPTZ NOT NULL,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW()
 );

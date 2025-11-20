@@ -94,7 +94,22 @@ BEGIN
         WHERE "PatientId" = user_id
           AND "IsActive" = TRUE
     ) INTO previous_assigned_doctor;
-    
+    IF previous_assigned_doctor THEN
+        UPDATE "SIGMAmed"."PatientCareTeam"
+        SET "IsActive" = FALSE
+        WHERE "PatientId" = user_id
+        AND "IsActive" = TRUE;
+    END IF;
+    -- Insert new patient care team record in patient care team
+    INSERT INTO "SIGMAmed"."PatientCareTeam" (
+        "DoctorId",
+        "PatientId",
+        "DoctorLevel"
+    ) VALUES (
+        '2595018b-69fd-4435-9c8e-3eaa91ef5bae', 
+        user_id,      
+        'primary'
+    );
 END $$;
 -- Commit transaction
 COMMIT;

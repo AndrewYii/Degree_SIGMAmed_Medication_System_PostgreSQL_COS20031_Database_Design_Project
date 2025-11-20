@@ -199,3 +199,10 @@ WHERE P."IsDeleted" = FALSE;
 
 -- View query
 SELECT * FROM "SIGMAmed"."PatientPrescriptionsView";
+
+
+
+
+
+
+

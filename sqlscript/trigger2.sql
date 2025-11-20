@@ -400,7 +400,7 @@ BEGIN
         
         interval_value := NEW."DoseInterval";
         times_per_day := NEW."TimesPerDay";
-
+        -- Recreate prescribedmedicationschedule 
         next_time := base_time;
         FOR i IN 1..times_per_day LOOP
             INSERT INTO "SIGMAmed"."PrescribedMedicationSchedule"(
@@ -428,4 +428,36 @@ AFTER UPDATE OF "DefaultDayMask"
 ON "SIGMAmed"."PrescribedMedication"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change();
+
+-- TRIGGER: Create record inside appointment reminder table 
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn_generate_appointment_reminders()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert reminder 1 day before
+    INSERT INTO "SIGMAmed"."AppointmentReminder"(
+        "AppointmentID",
+        "ScheduledTime"
+    ) VALUES (
+        NEW."AppointmentId",
+        NEW."AppointmentDate" - INTERVAL '1 day'
+    );
+
+    -- Insert reminder 1 hour before
+    INSERT INTO "SIGMAmed"."AppointmentReminder"(
+        "AppointmentID",
+        "ScheduledTime"
+    ) VALUES (
+        NEW."AppointmentId",
+        NEW."AppointmentDate" - INTERVAL '1 hour'
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_after_appointment_insert
+AFTER INSERT ON "SIGMAmed"."Appointment"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".fn_generate_appointment_reminders();
+
 
