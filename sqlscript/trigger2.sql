@@ -261,7 +261,8 @@ BEGIN
         -- If mask = '1' for this day, insert adherence record
         IF SUBSTRING(mask FROM day_index FOR 1) = '1' THEN
             scheduled_timestamp := check_date + NEW."ReminderTime";
-
+            
+            IF scheduled_timestamp > CURRENT_TIMESTAMP THEN
             INSERT INTO "SIGMAmed"."MedicationAdherenceRecord"(
                 "PrescribedMedicationScheduleID",
                 "DoseQuantity",
@@ -272,6 +273,7 @@ BEGIN
                 NULL,
                 scheduled_timestamp
             );
+            END IF;
         END IF;
 
         check_date := check_date + INTERVAL '1 day';
@@ -287,6 +289,143 @@ AFTER INSERT ON "SIGMAmed"."PrescribedMedicationSchedule"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_create_adherence_record();
 
--- TRIGGER: before update the reminder time in prescribed medication schedule table
-CREATE OR REPLACE FUNCTION "SIGMAmed".fn
+
+-- TRIGGER: Delete all old adherence
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn_delete_old_adherence()
+RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM "SIGMAmed"."MedicationAdherenceRecord"
+    WHERE "PrescribedMedicationScheduleID" = OLD."PrescribedMedicationScheduleId" AND "CurrentStatus" = 'Pending' AND "ScheduledTime" > NOW();
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_before_update_delete_adherence
+BEFORE UPDATE ON "SIGMAmed"."PrescribedMedicationSchedule"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".fn_delete_old_adherence();
+
+-- TRIGGER: Create the adherence record based on new day of week mask
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn_create_adherence_after_change()
+RETURNS TRIGGER AS $$
+DECLARE
+    prescribed_date DATE;
+    expiry_date DATE;
+    day_index INT;
+    check_date DATE;
+    scheduled_timestamp TIMESTAMPTZ;
+    prescription_id UUID;
+    mask TEXT;
+BEGIN
+    -- Get schedule mask
+    mask := NEW."DayOfWeekMask";
+
+    -- Get prescription data
+    SELECT 
+        "PrescribedDate",
+        "PrescriptionId"
+    INTO
+        prescribed_date,
+        prescription_id
+    FROM "SIGMAmed"."PrescribedMedication"
+    WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId";
+
+    -- Get expiry date
+    SELECT "ExpiryDate"
+    INTO expiry_date
+    FROM "SIGMAmed"."Prescription"
+    WHERE "PrescriptionId" = prescription_id;
+
+    check_date := prescribed_date;
+
+    -- Recreate adherence records
+    WHILE check_date <= expiry_date LOOP
+        day_index := EXTRACT(DOW FROM check_date);
+
+        IF day_index = 0 THEN
+            day_index := 7;
+        END IF;
+
+        IF SUBSTRING(mask FROM day_index FOR 1) = '1' THEN
+            scheduled_timestamp := check_date + NEW."ReminderTime";
+
+            INSERT INTO "SIGMAmed"."MedicationAdherenceRecord"(
+                "PrescribedMedicationScheduleID",
+                "DoseQuantity",
+                "ScheduledTime"
+            ) VALUES (
+                NEW."PrescribedMedicationScheduleId",
+                NULL,
+                scheduled_timestamp
+            );
+        END IF;
+
+        check_date := check_date + INTERVAL '1 day';
+    END LOOP;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_after_insert_update_create_adherence
+AFTER INSERT OR UPDATE ON "SIGMAmed"."PrescribedMedicationSchedule"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".fn_create_adherence_after_change();
+
+
+-- TRIGGER: Delete the related record in prescribed medication schedule table and medication adherence record table
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change()
+RETURNS TRIGGER AS $$
+DECLARE
+    interval_value INTERVAL;
+    times_per_day INT;
+    i INT;
+    base_time TIME := TIME '08:00:00';
+    next_time TIME;
+BEGIN
+    IF NEW."DefaultDayMask" IS DISTINCT FROM OLD."DefaultDayMask" THEN
+
+        -- 1. Delete adherence records (they reference schedule IDs)
+        DELETE FROM "SIGMAmed"."MedicationAdherenceRecord"
+        WHERE "PrescribedMedicationScheduleID" IN (
+            SELECT "PrescribedMedicationScheduleId"
+            FROM "SIGMAmed"."PrescribedMedicationSchedule"
+            WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId"
+        );
+
+        -- 2. Delete schedule records
+        DELETE FROM "SIGMAmed"."PrescribedMedicationSchedule"
+        WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId";
+        
+        interval_value := NEW."DoseInterval";
+        times_per_day := NEW."TimesPerDay";
+
+        next_time := base_time;
+        FOR i IN 1..times_per_day LOOP
+            INSERT INTO "SIGMAmed"."PrescribedMedicationSchedule"(
+                "PrescribedMedicationId",
+                "ReminderTime",
+                "DayOfWeekMask",
+                "DoseSequenceId"
+            )
+            VALUES(
+                NEW."PrescribedMedicationId",
+                next_time,
+                NEW."DefaultDayMask",
+                i
+            );
+            next_time := (next_time + interval_value);
+        END LOOP;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_after_mask_update
+AFTER UPDATE OF "DefaultDayMask"
+ON "SIGMAmed"."PrescribedMedication"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change();
 

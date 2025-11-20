@@ -18,5 +18,3 @@ COMMENT ON TABLE "SIGMAmed"."MedicationAdherenceRecord" IS 'Medication intake re
 
 -- Commit transaction for Creating Reminder Table
 COMMIT;
-
--- MODIFYING
