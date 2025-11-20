@@ -11,8 +11,9 @@ CREATE TABLE "SIGMAmed"."PatientReport" (
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
     "PrescribedMedicationId" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId"),
     "Type" "SIGMAmed".patient_report_status_enum NULL,
-    "Description" TEXT,
-    "AttachmentDirectory" TEXT NULL,
+    "Description" TEXT NOT NULL,
+    "Keywords" TEXT NULL,
+    "VoiceDirectory" TEXT NULL,
     "DoctorNote" TEXT NULL,
     "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
     "ReviewTime" TIMESTAMPTZ NULL,
@@ -25,3 +26,5 @@ COMMENT ON TABLE "SIGMAmed"."PatientReport" IS 'Patient health reports and commu
 
 -- Commit transaction for Creating Patient Report Table
 COMMIT;
+
+-- modifying

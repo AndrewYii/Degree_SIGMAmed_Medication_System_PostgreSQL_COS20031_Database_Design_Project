@@ -179,3 +179,114 @@ FOR EACH ROW
 WHEN (NEW."ReviewTime" IS NOT NULL)
 EXECUTE FUNCTION "SIGMAmed".notify_review_report();
 
+-- TRIGGER: Auto create the prescribed medication schedule record in Prescribed Medication schedule
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn_generate_medication_schedule()
+RETURNS TRIGGER AS $$
+DECLARE
+    interval_value INTERVAL;
+    times_per_day INT;
+    i INT;
+    base_time TIME := TIME '08:00:00';
+    next_time TIME;
+BEGIN
+    interval_value := NEW."DoseInterval";
+    times_per_day := NEW."TimesPerDay";
+
+    next_time := base_time;
+    FOR i IN 1..times_per_day LOOP
+        INSERT INTO "SIGMAmed"."PrescribedMedicationSchedule"(
+            "PrescribedMedicationId",
+            "ReminderTime",
+            "DayOfWeekMask",
+            "DoseSequenceId"
+        )
+        VALUES(
+            NEW."PrescribedMedicationId",
+            next_time,
+            NEW."DefaultDayMask",
+            i
+        );
+        next_time := (next_time + interval_value);
+    END LOOP;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_after_prescribed_med_insert
+AFTER INSERT ON "SIGMAmed"."PrescribedMedication"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".fn_generate_medication_schedule();
+
+-- TRIGGER: Auto create the adherence record in Medication adherence 
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn_create_adherence_record()
+RETURNS TRIGGER AS $$
+DECLARE 
+    prescribed_date DATE;
+    expiry_date DATE;
+    mask TEXT;
+    day_index INT;
+    check_date DATE;
+    scheduled_timestamp TIMESTAMPTZ;
+    v_prescription_id UUID;
+BEGIN 
+    -- Get prescribed_date + day mask + prescription id from PrescribedMedication
+    SELECT 
+        "PrescribedDate",
+        "DefaultDayMask",
+        "PrescriptionId"
+    INTO 
+        prescribed_date,
+        mask,
+        v_prescription_id
+    FROM "SIGMAmed"."PrescribedMedication"
+    WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId";
+
+    -- Get expiry date from Prescription table
+    SELECT "ExpiryDate"
+    INTO expiry_date
+    FROM "SIGMAmed"."Prescription"
+    WHERE "PrescriptionId" = v_prescription_id;
+
+    check_date := prescribed_date;
+
+    -- DAILY LOOP UNTIL EXPIRY DATE
+    WHILE check_date <= expiry_date LOOP
+        
+        day_index := EXTRACT(DOW FROM check_date)::INT;
+        IF day_index = 0 THEN
+            day_index := 7;
+        END IF;
+
+        -- If mask = '1' for this day, insert adherence record
+        IF SUBSTRING(mask FROM day_index FOR 1) = '1' THEN
+            scheduled_timestamp := check_date + NEW."ReminderTime";
+
+            INSERT INTO "SIGMAmed"."MedicationAdherenceRecord"(
+                "PrescribedMedicationScheduleID",
+                "DoseQuantity",
+                "ScheduledTime"
+            )
+            VALUES(
+                NEW."PrescribedMedicationScheduleId",
+                NULL,
+                scheduled_timestamp
+            );
+        END IF;
+
+        check_date := check_date + INTERVAL '1 day';
+    END LOOP;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_after_insert_schedule
+AFTER INSERT ON "SIGMAmed"."PrescribedMedicationSchedule"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".fn_create_adherence_record();
+
+-- TRIGGER: before update the reminder time in prescribed medication schedule table
+CREATE OR REPLACE FUNCTION "SIGMAmed".fn
+

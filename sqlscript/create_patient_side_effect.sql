@@ -11,7 +11,7 @@ CREATE TABLE "SIGMAmed"."PatientSideEffect" (
     "SideEffectName" VARCHAR(100) NOT NULL,
     "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
     "OnsetDate" DATE NOT NULL,
-    "PatientNotes" TEXT,
+    -- "PatientNotes" TEXT,Can throw
     "ResolutionDate" DATE NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,

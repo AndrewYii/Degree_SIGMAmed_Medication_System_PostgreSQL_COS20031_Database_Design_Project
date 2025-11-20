@@ -9,7 +9,7 @@ CREATE TABLE "SIGMAmed"."PrescribedMedicationSchedule" (
     "PrescribedMedicationScheduleId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "PrescribedMedicationId" UUID NOT NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId") ON DELETE CASCADE,
     "ReminderTime" TIME NOT NULL,
-    "DayOfWeekMask" VARCHAR(7) DEFAULT '0000000',
+    "DayOfWeekMask" VARCHAR(7) NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "DoseSequenceId" INT NOT NULL

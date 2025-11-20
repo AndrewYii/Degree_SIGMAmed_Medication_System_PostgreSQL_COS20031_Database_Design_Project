@@ -66,6 +66,10 @@ INSERT INTO "SIGMAmed"."PatientSymptom" (
     "MedicalHistoryId",
     "PatientId",
     "SymptomName",
+    "Severity",
+    "OnsetDate",
+    "ResolutionDate",
+    "CreatedAt",
     "IsDeleted",
     "UpdatedAt"
 )
@@ -74,6 +78,10 @@ VALUES
     medical_history1_id,
     user_id,
     'Headache',
+    'mild',
+    NOW(),
+    NULL,
+    NULL,
     FALSE, 
     NOW() 
 ),
@@ -82,6 +90,10 @@ VALUES
     medical_history1_id,
     user_id,
     'Fatigue',
+    'mild',
+    NOW(),
+    NULL,
+    NULL,
     FALSE, 
     NOW() 
 ),
@@ -90,6 +102,10 @@ VALUES
     medical_history1_id,
     user_id,
     'Mild chest pressure',
+    'mild',
+    NOW(),
+    NULL,
+    NULL,
     FALSE, 
     NOW() 
 ),
@@ -98,6 +114,10 @@ VALUES
     medical_history2_id,
     user_id,
     'Chest congestion',
+    'mild',
+    NOW(),
+    NULL,
+    NULL,
     FALSE, 
     NOW() 
 ),
@@ -106,6 +126,10 @@ VALUES
     medical_history2_id,
     user_id,
     'Sore throat',
+    'mild',
+    NOW(),
+    NULL,
+    NULL,
     FALSE, 
     NOW() 
 ),
@@ -114,6 +138,10 @@ VALUES
     medical_history2_id,
     user_id,
     'Shortness of breath',
+    'mild',
+    NOW(),
+    NULL,
+    NULL,
     FALSE, 
     NOW() 
 );
@@ -124,10 +152,13 @@ SELECT
 	U."FirstName",
 	U."LastName",
 	MH."DiseaseName",
-	MH."Severity",
+	MH."Severity" AS "DiseaseSeverity",
 	MH."DiagnosedDate",
-	MH."ResolutionDate",
-	PS."SymptomName"
+	MH."ResolutionDate" AS "DiseaseResolution",
+	PS."SymptomName",
+    PS."Severity" AS "SymptomSeverity",
+    PS."OnsetDate",
+    PS."ResolutionDate" AS "SymptomResolution"
 FROM
 	"SIGMAmed"."MedicalHistory" AS MH
 	INNER JOIN "SIGMAmed"."User" AS U ON U."UserId" = MH."PatientId"

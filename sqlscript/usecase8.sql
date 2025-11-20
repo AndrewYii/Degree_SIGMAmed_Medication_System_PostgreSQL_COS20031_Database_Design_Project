@@ -13,8 +13,6 @@ DECLARE
     prescription_id UUID;
     medication1_id UUID;
     medication2_id UUID;
-    new_pm1_id UUID;
-    new_pm2_id UUID;
 BEGIN
 -- Check whether that prescription number exists before
     IF EXISTS (
@@ -66,6 +64,7 @@ INSERT INTO "SIGMAmed"."PrescribedMedication" (
     "DosePerTime",
     "Status",
     "DefaultDayMask",
+    "DoseInterval",
     "PrescribedDate",
     "IsDeleted",
     "MedicationNameSnapshot",
@@ -79,15 +78,15 @@ VALUES (
     90.00,                             
     1.00,                             
     'active',                               
-    '1111111',   
+    '1111111', 
+    INTERVAL '8 Hours',  
     '2025-01-10',   
     FALSE,     
     'Lisinopril (10mg)',   
     3,
     NOW(),
     NOW()                     
-)
-RETURNING "PrescribedMedicationId" INTO new_pm1_id;
+);
 
 INSERT INTO "SIGMAmed"."PrescribedMedication" (
     "PrescriptionId",
@@ -96,6 +95,7 @@ INSERT INTO "SIGMAmed"."PrescribedMedication" (
     "DosePerTime",
     "Status",
     "DefaultDayMask",
+    "DoseInterval",
     "PrescribedDate",
     "IsDeleted",
     "MedicationNameSnapshot",
@@ -109,60 +109,14 @@ VALUES (
     90.00,                             
     1.00,                             
     'active',                               
-    '1111111',   
+    '1111111', 
+    INTERVAL '8 Hours',
     '2025-01-12',   
     FALSE,     
     'Hydrochlorothiazide (25mg)',   
     1,
     NOW(),
     NOW()                     
-)
-RETURNING "PrescribedMedicationId" INTO new_pm2_id;
-
--- Insert new record for prescribed medication schedule
-INSERT INTO "SIGMAmed"."PrescribedMedicationSchedule" (
-    "PrescribedMedicationId",
-    "ReminderTime",
-    "DayOfWeekMask",
-    "UpdatedAt",
-    "DoseSequenceId",
-    "CreatedAt"
-)
-VALUES
-(
-    new_pm1_id,
-    '08:00:00',
-    '1111111',
-    NOW(),
-    1,
-    NOW()
-),
-
-(
-    new_pm1_id,
-    '14:00:00',
-    '1111111',
-    NOW(),
-    2,
-    NOW()
-),
-
-(
-    new_pm1_id,
-    '20:00:00',
-    '1111111',
-    NOW(),
-    3,
-    NOW()
-),
-
-(
-    new_pm2_id,
-    '08:00:00',
-    '1111111',
-    NOW(),
-    1,
-    NOW()
 );
 
 END $$;

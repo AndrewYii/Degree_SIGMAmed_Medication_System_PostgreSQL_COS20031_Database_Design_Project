@@ -13,6 +13,7 @@ CREATE TABLE "SIGMAmed"."PrescribedMedication" (
     "DosePerTime" DECIMAL(5,2) NOT NULL,
     "Status" prescribedmedication_status_enum DEFAULT 'active',
     "DefaultDayMask" VARCHAR(7) NOT NULL,
+    "DoseInterval" INTERVAL NOT NULL,
     "PrescribedDate" DATE NOT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "MedicationNameSnapshot" VARCHAR(100) NOT NULL,

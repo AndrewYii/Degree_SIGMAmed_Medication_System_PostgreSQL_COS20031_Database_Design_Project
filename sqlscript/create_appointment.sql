@@ -9,17 +9,12 @@ CREATE TABLE "SIGMAmed"."Appointment" (
     "AppointmentId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "DoctorId" UUID NOT NULL REFERENCES "SIGMAmed"."Doctor"("UserId") ON DELETE RESTRICT,
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
-    "AppointmentDate" DATE NOT NULL,
-    "AppointmentTime" TIME NOT NULL,
-    "DurationMinutes" INT NOT NULL,
+    "AppointmentDate" TIMESTAMPTZ NOT NULL,
     "AppointmentType" "SIGMAmed".appointment_type_enum NOT NULL,
     "Status" "SIGMAmed".appointment_status_enum DEFAULT 'scheduled',
-    "Notes" TEXT,
-    "IsEmergency" BOOLEAN DEFAULT FALSE,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
-    "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT chk_duration CHECK ("DurationMinutes" > 0 AND "DurationMinutes" <= 480)
+    "CreatedAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE "SIGMAmed"."Appointment" IS 'Medical appointments between doctors and patients';

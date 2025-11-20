@@ -13,6 +13,8 @@ CREATE TABLE "SIGMAmed"."PatientSymptom" (
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId"),
     "SymptomName" VARCHAR(100) NOT NULL,
     "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
+    "OnsetDate" TIMESTAMPTZ NOT NULL,
+    "ResolutionDate" TIMESTAMPTZ NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
@@ -24,3 +26,4 @@ COMMENT ON TABLE "SIGMAmed"."PatientSymptom" IS 'Symptoms associated with medica
 -- Commit transaction for Creating Patient Symptom Table
 COMMIT;
 
+-- MODIFYING
