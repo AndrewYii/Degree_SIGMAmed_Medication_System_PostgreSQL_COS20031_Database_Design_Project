@@ -13,6 +13,7 @@ DECLARE
     prescription_id UUID;
     medication1_id UUID;
     medication2_id UUID;
+    hospital_doctor_id UUID;
 BEGIN
 -- Check whether that prescription number exists before
     IF EXISTS (
@@ -27,6 +28,13 @@ BEGIN
 -- Select the patient id based on ICPassportNumber
 SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
 
+-- Select the doctor id from new hospital
+    SELECT "UserId"
+    FROM "SIGMAmed"."User" INTO hospital_doctor_id
+    WHERE "ICPassportNumber" = 'GH2849372949';
+RAISE NOTICE 'Switching ActedBy user to hospital doctor ID: %', hospital_doctor_id;
+EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_doctor_id);
+
 -- Insert the new prescription inside the prescription table
 INSERT INTO "SIGMAmed"."Prescription" (
     "DoctorId",
@@ -39,7 +47,7 @@ INSERT INTO "SIGMAmed"."Prescription" (
     "UpdatedAt",
     "CreatedAt"
 ) VALUES (
-    '2595018b-69fd-4435-9c8e-3eaa91ef5bae', 
+    hospital_doctor_id, 
     user_id,                    
     'PRESCRIPTION1-2025-091119',                   
     'active',  
@@ -52,9 +60,9 @@ INSERT INTO "SIGMAmed"."Prescription" (
 RETURNING "PrescriptionId" INTO prescription_id;
 
 -- Select the medication id based on medication name
-SELECT "MedicationID" INTO medication1_id FROM "SIGMAmed"."Medication" WHERE "MedicationName"='Lisinopril (10mg)' AND "IsDeleted"=FALSE;
+SELECT "MedicationId" INTO medication1_id FROM "SIGMAmed"."Medication" WHERE "MedicationName"='Lisinopril (10mg)' AND "IsDeleted"=FALSE;
 
-SELECT "MedicationID" INTO medication2_id FROM "SIGMAmed"."Medication" WHERE "MedicationName"='Hydrochlorothiazide (25mg)' AND "IsDeleted"=FALSE;
+SELECT "MedicationId" INTO medication2_id FROM "SIGMAmed"."Medication" WHERE "MedicationName"='Hydrochlorothiazide (25mg)' AND "IsDeleted"=FALSE;
 
 -- Insert new prescribed medication records into the PrescribeMedication table
 INSERT INTO "SIGMAmed"."PrescribedMedication" (

@@ -12,8 +12,8 @@ CREATE TABLE "SIGMAmed"."MedicalHistory" (
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
     "DiseaseName" VARCHAR(100) NOT NULL,
     "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
-    "DiagnosedDate" DATE NOT NULL,
-    "ResolutionDate" DATE NULL,
+    "DiagnosedDate" TIMESTAMPTZ NOT NULL,
+    "ResolutionDate" TIMESTAMPTZ NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()

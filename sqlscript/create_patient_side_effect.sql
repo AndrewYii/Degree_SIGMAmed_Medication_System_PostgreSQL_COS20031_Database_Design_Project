@@ -6,18 +6,17 @@ BEGIN;
 
 CREATE TABLE "SIGMAmed"."PatientSideEffect" (
     -- for supabase, need to use extensions.uuid_generate_v4()
-    "PatientSideEffectID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "PrescribedMedicationID" UUID NOT NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId") ON DELETE CASCADE,
+    "PatientSideEffectId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "PrescribedMedicationId" UUID NOT NULL REFERENCES "SIGMAmed"."PrescribedMedication"("PrescribedMedicationId") ON DELETE CASCADE,
     "SideEffectName" VARCHAR(100) NOT NULL,
     "Severity" "SIGMAmed".severity_enum DEFAULT 'mild',
-    "OnsetDate" DATE NOT NULL,
-    -- "PatientNotes" TEXT,Can throw
-    "ResolutionDate" DATE NULL,
+    "OnsetDate" TIMESTAMPTZ NOT NULL,
+    "ResolutionDate" TIMESTAMPTZ NULL,
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT chk_side_effect_dates CHECK ("ResolutionDate" IS NULL OR "OnsetDate" <= "ResolutionDate"),
-    UNIQUE("PrescribedMedicationID", "SideEffectName")
+    UNIQUE("PrescribedMedicationId", "SideEffectName")
 );
 
 COMMENT ON TABLE "SIGMAmed"."PatientSideEffect" IS 'Side effects reported by patients for prescribed medications';

@@ -9,7 +9,7 @@ BEGIN;
 CREATE TABLE "SIGMAmed"."User" (
     -- for supabase, need to use extensions.uuid_generate_v4()
     "UserId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "ClinicalInstitutionId" UUID NULL REFERENCES "SIGMAmed"."ClinicalInstitution"("ClinicalInstitutionID") ON DELETE RESTRICT,
+    "ClinicalInstitutionId" UUID NULL REFERENCES "SIGMAmed"."ClinicalInstitution"("ClinicalInstitutionId") ON DELETE RESTRICT,
     "Username" VARCHAR(50) UNIQUE NOT NULL,
     "Email" CITEXT UNIQUE NOT NULL,
     "PasswordHash" VARCHAR(255) NOT NULL,

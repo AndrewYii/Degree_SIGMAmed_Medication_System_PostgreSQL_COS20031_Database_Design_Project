@@ -8,11 +8,19 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 BEGIN;
 
 DO $$
+DECLARE 
+    patient_id UUID;
 BEGIN
+-- Select the patient id 
+    SELECT "UserId"
+    FROM "SIGMAmed"."User" INTO patient_id
+    WHERE "ICPassportNumber" = 'XH69273838';
+RAISE NOTICE 'Switching ActedBy user to patient ID: %', patient_id;
+EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(patient_id);
 -- Update the CurrentStatus and DoseQuantity column in the MedicationAdherenceRecord table
 UPDATE "SIGMAmed"."MedicationAdherenceRecord"
 SET "CurrentStatus" = 'Taken', "DoseQuantity" = 1
-WHERE "MedicationAdherenceRecordID" = '0cffe722-96d8-45f9-9d11-37a4a0e5698e';
+WHERE "MedicationAdherenceRecordId" = '01f74c3a-7ad7-4358-adfc-3d5283a38b4c';
 
 END $$;
 -- Commit transaction

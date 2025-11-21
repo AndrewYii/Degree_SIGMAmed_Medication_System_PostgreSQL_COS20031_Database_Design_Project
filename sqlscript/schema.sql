@@ -19,7 +19,7 @@ CREATE EXTENSION IF NOT EXISTS "citext" SCHEMA public;
 
 -- Create Enums for SIGMAmed
 CREATE TYPE "SIGMAmed".user_role_enum AS ENUM ('admin', 'doctor', 'patient');
-CREATE TYPE "SIGMAmed".action_type_enum AS ENUM ('create', 'update', 'delete');
+CREATE TYPE "SIGMAmed".action_type_enum AS ENUM ('insert', 'update', 'delete');
 CREATE TYPE "SIGMAmed".prescription_status_enum AS ENUM ('active', 'completed');
 CREATE TYPE "SIGMAmed".prescribedmedication_status_enum AS ENUM ('active', 'completed','stop');
 CREATE TYPE "SIGMAmed".appointment_status_enum AS ENUM ('scheduled', 'confirmed', 'completed', 'cancelled');
@@ -31,8 +31,4 @@ CREATE TYPE "SIGMAmed".admin_level_enum AS ENUM ('super', 'hospital');
 CREATE TYPE "SIGMAmed".weekday_enum AS ENUM ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
 CREATE TYPE "SIGMAmed".dosage_form_enum AS ENUM ('tablet','capsule','syrup','injection');
 CREATE TYPE "SIGMAmed".severity_enum AS ENUM ('mild','moderate','severe');
--- Create Types for Alerts and Notifications
--- CREATE TYPE "SIGMAmed".alert_severity_enum AS ENUM ('low', 'medium', 'high', 'critical');
--- CREATE TYPE "SIGMAmed".alert_status_enum AS ENUM ('pending', 'acknowledged', 'resolved', 'ignored');
--- CREATE TYPE "SIGMAmed".notification_status_enum AS ENUM ('pending', 'sent', 'failed', 'cancelled');
--- CREATE TYPE "SIGMAmed".notification_channel_enum AS ENUM ('push', 'email', 'sms', 'in_app');
+

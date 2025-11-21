@@ -5,8 +5,8 @@ SET search_path TO "SIGMAmed", public;
 BEGIN;
 
 CREATE TABLE "SIGMAmed"."MedicationAdherenceRecord" (
-    "MedicationAdherenceRecordID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "PrescribedMedicationScheduleID" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationScheduleId"),
+    "MedicationAdherenceRecordId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "PrescribedMedicationScheduleId" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationScheduleId"),
     "CurrentStatus" "SIGMAmed".reminder_status_enum DEFAULT 'Pending',
     "DoseQuantity" DECIMAL(5,2) NULL,
     "ScheduledTime" TIMESTAMPTZ NOT NULL,
