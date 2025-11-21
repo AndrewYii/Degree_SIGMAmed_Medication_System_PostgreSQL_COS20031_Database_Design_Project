@@ -14,6 +14,7 @@ DECLARE
     hospital_exists BOOLEAN;
     danielchester_hospital_id UUID;
     danielchester_doctor_id UUID;
+    previous_assigned_doctor BOOLEAN;
 BEGIN
 -- Select the patient based on ICPassportNumber
     SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
@@ -87,8 +88,28 @@ BEGIN
         'primary'
     );
     -- Deactive the previous clinical institution's assigned doctor
-    UPDATE 
-
+     SELECT EXISTS (
+        SELECT 
+        FROM "SIGMAmed"."PatientCareTeam"
+        WHERE "PatientId" = user_id
+          AND "IsActive" = TRUE
+    ) INTO previous_assigned_doctor;
+    IF previous_assigned_doctor THEN
+        UPDATE "SIGMAmed"."PatientCareTeam"
+        SET "IsActive" = FALSE
+        WHERE "PatientId" = user_id
+        AND "IsActive" = TRUE;
+    END IF;
+    -- Insert new patient care team record in patient care team
+    INSERT INTO "SIGMAmed"."PatientCareTeam" (
+        "DoctorId",
+        "PatientId",
+        "DoctorLevel"
+    ) VALUES (
+        '2595018b-69fd-4435-9c8e-3eaa91ef5bae', 
+        user_id,      
+        'primary'
+    );
 END $$;
 -- Commit transaction
 COMMIT;

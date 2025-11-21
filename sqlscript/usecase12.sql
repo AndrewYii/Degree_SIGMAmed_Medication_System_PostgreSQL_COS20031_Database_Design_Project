@@ -8,30 +8,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 BEGIN;
 
 DO $$
-DECLARE 
-    doctor_id UUID;
-    user_id UUID;
 BEGIN
--- Select DoctorId based on MedicalLicenseNumber
-    SELECT "UserId" INTO doctor_id FROM "SIGMAmed"."Doctor" WHERE "MedicalLicenseNumber" = 'TEMP-2595018b-69fd-4435-9c8e-3eaa91ef5bae';
-
--- Select the patient id based on ICPassportNumber
-SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
-
--- Insert the new patient report record inside the patient report table (insert raw file directory)
-INSERT INTO "SIGMAmed"."PatientReport" (
-    "DoctorId",
-    "PatientId",
-    "Description",
-    "Type",
-    "Severity"
-) VALUES (
-    doctor_id, 
-    user_id,                    
-    'I have been experiencing dizziness and nausea',
-    'SideEffect',                   
-    'mild'
-);
+-- Update the CurrentStatus and DoseQuantity column in the MedicationAdherenceRecord table
+UPDATE "SIGMAmed"."MedicationAdherenceRecord"
+SET "CurrentStatus" = 'Taken', "DoseQuantity" = 1
+WHERE "MedicationAdherenceRecordID" = '0cffe722-96d8-45f9-9d11-37a4a0e5698e';
 
 END $$;
 -- Commit transaction
