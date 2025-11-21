@@ -361,7 +361,7 @@ class SIGMAmedDataGenerator:
             unit = self._get_unit_for_dosage_form(dosage_form)
             
             medications.append({
-                'ClinicalInstitutionID': institution_id,
+                'ClinicalInstitutionId': institution_id,
                 'MedicationName': med_name,
                 'Unit': unit,
                 'DosageForm': dosage_form,

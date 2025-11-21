@@ -206,12 +206,12 @@ class DummyDataInserter100K:
                     ("ClinicalInstitutionName", "IsDeleted")
                     VALUES %s 
                     ON CONFLICT DO NOTHING
-                    RETURNING "ClinicalInstitutionID"''',
+                    RETURNING "ClinicalInstitutionId"''',
                 values,
                 fetch=True
             )
             
-            batch_ids = [row['ClinicalInstitutionID'] if isinstance(row, dict) else row[0] for row in result]
+            batch_ids = [row['ClinicalInstitutionId'] if isinstance(row, dict) else row[0] for row in result]
             institution_ids.extend(batch_ids)
             self.conn.commit()
             print(f"  ✓ Progress: {len(institution_ids):,}/{count:,} institutions created", end='\r')
@@ -428,7 +428,7 @@ class DummyDataInserter100K:
             meds = self.generator.generate_medication(institution_id, num_meds)
             
             for med in meds:
-                values.append((med['ClinicalInstitutionID'], med['MedicationName'],
+                values.append((med['ClinicalInstitutionId'], med['MedicationName'],
                               med['Unit'], med['DosageForm'], med['IsDeleted']))
             
             # Insert when batch is full
@@ -436,9 +436,9 @@ class DummyDataInserter100K:
                 execute_values(
                     self.cursor,
                     f'''INSERT INTO "{self.schema}"."Medication"
-                        ("ClinicalInstitutionID", "MedicationName", "Unit", "DosageForm", "IsDeleted")
+                        ("ClinicalInstitutionId", "MedicationName", "Unit", "DosageForm", "IsDeleted")
                         VALUES %s
-                        ON CONFLICT ("ClinicalInstitutionID", "MedicationName") DO NOTHING''',
+                        ON CONFLICT ("ClinicalInstitutionId", "MedicationName") DO NOTHING''',
                     values
                 )
                 total_meds += len(values)
@@ -451,79 +451,81 @@ class DummyDataInserter100K:
             execute_values(
                 self.cursor,
                 f'''INSERT INTO "{self.schema}"."Medication"
-                    ("ClinicalInstitutionID", "MedicationName", "Unit", "DosageForm", "IsDeleted")
+                    ("ClinicalInstitutionId", "MedicationName", "Unit", "DosageForm", "IsDeleted")
                     VALUES %s
-                    ON CONFLICT ("ClinicalInstitutionID", "MedicationName") DO NOTHING''',
+                    ON CONFLICT ("ClinicalInstitutionId", "MedicationName") DO NOTHING''',
                 values
             )
             total_meds += len(values)
             self.conn.commit()
         
         # Get all medication IDs
-        self.cursor.execute(f'SELECT "MedicationID" FROM "{self.schema}"."Medication" WHERE "IsDeleted" = false')
-        medication_ids = [row['MedicationID'] for row in self.cursor.fetchall()]
+        self.cursor.execute(f'SELECT "MedicationId" FROM "{self.schema}"."Medication" WHERE "IsDeleted" = false')
+        medication_ids = [row['MedicationId'] for row in self.cursor.fetchall()]
         
         print(f"\n  ✓ Created {total_meds:,} medication records ({len(medication_ids):,} unique)")
         return medication_ids
     
-    def insert_assigned_doctors(self, doctor_ids, patient_ids, target_count=100000):
+    def insert_patient_care_teams(self, doctor_ids, patient_ids, target_count=100000):
         """Assign doctors to patients - each patient gets 1-2 doctors"""
-        print(f"\n🤝 Creating {target_count:,} doctor-patient assignments...")
+        print(f"\n🤝 Creating {target_count:,} doctor-patient care team assignments...")
         
         batch_size = 5000
-        assigned_ids = []
+        care_team_ids = []
         assignments = []
         
         # Strategy: Each patient gets 1 primary doctor, some get secondary
         for i, patient_id in enumerate(patient_ids):
-            if len(assigned_ids) >= target_count:
+            if len(care_team_ids) >= target_count:
                 break
             
             # Primary doctor
             primary_doctor = random.choice(doctor_ids)
-            assignments.append((primary_doctor, patient_id, 'primary', False))
+            role = random.choice(['General Practitioner', 'Primary Care Physician', 'Family Doctor'])
+            assignments.append((primary_doctor, patient_id, 'primary', role, True, False))
             
             # 40% chance of secondary doctor
-            if random.random() < 0.4 and len(assigned_ids) + len(assignments) < target_count:
+            if random.random() < 0.4 and len(care_team_ids) + len(assignments) < target_count:
                 secondary_doctor = random.choice([d for d in doctor_ids if d != primary_doctor])
-                assignments.append((secondary_doctor, patient_id, 'secondary', False))
+                secondary_role = random.choice(['Specialist', 'Consultant', 'Surgeon'])
+                assignments.append((secondary_doctor, patient_id, 'secondary', secondary_role, True, False))
             
             # Insert batch
             if len(assignments) >= batch_size:
                 result = execute_values(
                     self.cursor,
-                    f'''INSERT INTO "{self.schema}"."AssignedDoctor"
-                        ("DoctorId", "PatientId", "DoctorLevel", "IsDeleted")
+                    f'''INSERT INTO "{self.schema}"."PatientCareTeam"
+                        ("DoctorId", "PatientId", "DoctorLevel", "Role", "IsActive", "IsDeleted")
                         VALUES %s
                         ON CONFLICT ("DoctorId", "PatientId", "DoctorLevel") DO NOTHING
-                        RETURNING "AssignedDoctorId"''',
+                        RETURNING "PatientCareTeamId"''',
                     assignments,
                     fetch=True
                 )
-                batch_ids = [row['AssignedDoctorId'] if isinstance(row, dict) else row[0] for row in result]
-                assigned_ids.extend(batch_ids)
+                batch_ids = [row['PatientCareTeamId'] if isinstance(row, dict) else row[0] for row in result]
+                care_team_ids.extend(batch_ids)
                 self.conn.commit()
-                print(f"  ✓ Progress: {len(assigned_ids):,}/{target_count:,} assignments created", end='\r')
+                print(f"  ✓ Progress: {len(care_team_ids):,}/{target_count:,} care team assignments created", end='\r')
                 assignments = []
         
         # Insert remaining
         if assignments:
             result = execute_values(
                 self.cursor,
-                f'''INSERT INTO "{self.schema}"."AssignedDoctor"
-                    ("DoctorId", "PatientId", "DoctorLevel", "IsDeleted")
+                f'''INSERT INTO "{self.schema}"."PatientCareTeam"
+                    ("DoctorId", "PatientId", "DoctorLevel", "Role", "IsActive", "IsDeleted")
                     VALUES %s
                     ON CONFLICT ("DoctorId", "PatientId", "DoctorLevel") DO NOTHING
-                    RETURNING "AssignedDoctorId"''',
+                    RETURNING "PatientCareTeamId"''',
                 assignments,
                 fetch=True
             )
-            batch_ids = [row['AssignedDoctorId'] if isinstance(row, dict) else row[0] for row in result]
-            assigned_ids.extend(batch_ids)
+            batch_ids = [row['PatientCareTeamId'] if isinstance(row, dict) else row[0] for row in result]
+            care_team_ids.extend(batch_ids)
             self.conn.commit()
         
-        print(f"\n  ✓ Created {len(assigned_ids):,} doctor-patient assignments")
-        return assigned_ids
+        print(f"\n  ✓ Created {len(care_team_ids):,} patient care team assignments")
+        return care_team_ids
     
     def insert_medical_histories(self, patient_ids, target_count=100000):
         """Insert medical histories for patients"""
@@ -544,7 +546,7 @@ class DummyDataInserter100K:
                 if len(history_ids) + len(values) >= target_count:
                     break
                     
-                severity = random.choice(['mild', 'moderate', 'severe', 'life_threatening'])
+                severity = random.choice(['mild', 'moderate', 'severe'])
                 diagnosed_date = self.generator.fake.date_between(start_date='-5y', end_date='today')
                 resolution_date = self.generator.fake.date_between(start_date=diagnosed_date, end_date='today') if random.random() > 0.4 else None
                 values.append((patient_id, disease, severity, diagnosed_date, resolution_date, False))
@@ -619,7 +621,12 @@ class DummyDataInserter100K:
                 if len(symptom_ids) + len(values) >= target_count:
                     break
                 
-                values.append((history['MedicalHistoryId'], history['PatientId'], symptom))
+                severity = random.choice(['mild', 'moderate', 'severe'])
+                onset_date = self.generator.fake.date_between(start_date='-6m', end_date='today')
+                # 50% resolved
+                resolution_date = self.generator.fake.date_between(start_date=onset_date, end_date='today') if random.random() > 0.5 else None
+                
+                values.append((history['MedicalHistoryId'], history['PatientId'], symptom, severity, onset_date, resolution_date))
             
             history_idx += 1
             
@@ -628,7 +635,7 @@ class DummyDataInserter100K:
                 result = execute_values(
                     self.cursor,
                     f'''INSERT INTO "{self.schema}"."PatientSymptom"
-                        ("MedicalHistoryId", "PatientId", "SymptomName")
+                        ("MedicalHistoryId", "PatientId", "SymptomName", "Severity", "OnsetDate", "ResolutionDate")
                         VALUES %s
                         ON CONFLICT ("MedicalHistoryId", "SymptomName") DO NOTHING
                         RETURNING "PatientSymptomId"''',
@@ -646,7 +653,7 @@ class DummyDataInserter100K:
             result = execute_values(
                 self.cursor,
                 f'''INSERT INTO "{self.schema}"."PatientSymptom"
-                    ("MedicalHistoryId", "PatientId", "SymptomName")
+                    ("MedicalHistoryId", "PatientId", "SymptomName", "Severity", "OnsetDate", "ResolutionDate")
                     VALUES %s
                     ON CONFLICT ("MedicalHistoryId", "SymptomName") DO NOTHING
                     RETURNING "PatientSymptomId"''',
@@ -737,7 +744,7 @@ class DummyDataInserter100K:
                 # Get medication name for snapshot
                 self.cursor.execute(f'''
                     SELECT "MedicationName" FROM "{self.schema}"."Medication" 
-                    WHERE "MedicationID" = %s
+                    WHERE "MedicationId" = %s
                 ''', (med_id,))
                 med_result = self.cursor.fetchone()
                 med_name = med_result['MedicationName'] if med_result else 'Unknown Medication'
@@ -746,11 +753,14 @@ class DummyDataInserter100K:
                 dose_per_time = round(random.uniform(5, 100), 2)
                 times_per_day = random.randint(1, 4)
                 prescribed_date = self.generator.fake.date_between(start_date='-6m', end_date='today')
-                status = random.choice(['active', 'completed'])  # Only valid ENUM values
+                status = random.choice(['active', 'completed', 'stop'])  # Updated ENUM values
                 default_day_mask = '1111111' if random.random() > 0.3 else '1111100'  # Weekdays vs all days
+                # DoseInterval: hours between doses (e.g., 6, 8, 12, 24 hours)
+                dose_interval_hours = random.choice([6, 8, 12, 24])
+                dose_interval = timedelta(hours=dose_interval_hours)
                 
                 values.append((prescription_id, med_id, dosage_amount, dose_per_time, status,
-                              default_day_mask, prescribed_date, med_name, times_per_day, False))
+                              default_day_mask, dose_interval, prescribed_date, med_name, times_per_day, False))
             
             prescription_idx += 1
             
@@ -760,7 +770,7 @@ class DummyDataInserter100K:
                     self.cursor,
                     f'''INSERT INTO "{self.schema}"."PrescribedMedication"
                         ("PrescriptionId", "MedicationId", "DosageAmountPrescribed", "DosePerTime",
-                         "Status", "DefaultDayMask", "PrescribedDate", "MedicationNameSnapshot",
+                         "Status", "DefaultDayMask", "DoseInterval", "PrescribedDate", "MedicationNameSnapshot",
                          "TimesPerDay", "IsDeleted")
                         VALUES %s
                         RETURNING "PrescribedMedicationId"''',
@@ -779,7 +789,7 @@ class DummyDataInserter100K:
                 self.cursor,
                 f'''INSERT INTO "{self.schema}"."PrescribedMedication"
                     ("PrescriptionId", "MedicationId", "DosageAmountPrescribed", "DosePerTime",
-                     "Status", "DefaultDayMask", "PrescribedDate", "MedicationNameSnapshot",
+                     "Status", "DefaultDayMask", "DoseInterval", "PrescribedDate", "MedicationNameSnapshot",
                      "TimesPerDay", "IsDeleted")
                     VALUES %s
                     RETURNING "PrescribedMedicationId"''',
@@ -882,22 +892,19 @@ class DummyDataInserter100K:
                 
                 # Future appointments (1-180 days ahead)
                 days_ahead = random.randint(1, 180)
-                appointment_date = date.today() + timedelta(days=days_ahead)
-                appointment_time = time(hour=random.randint(8, 17), minute=random.choice([0, 15, 30, 45]))
-                duration = random.choice([15, 30, 45, 60])
+                appointment_date = datetime.combine(
+                    date.today() + timedelta(days=days_ahead),
+                    time(hour=random.randint(8, 17), minute=random.choice([0, 15, 30, 45]))
+                )
                 appt_type = random.choice(['consultation', 'follow-up'])  # Only valid ENUM values
-                status = random.choice(['scheduled', 'confirmed', 'completed', 'cancelled'])  # All valid values
-                notes = self.generator.fake.sentence() if random.random() > 0.5 else None
-                is_emergency = random.random() < 0.05
+                status = random.choice(['scheduled', 'completed', 'cancelled'])  # Valid values from schema
                 
-                values.append((doctor_id, patient_id, appointment_date, appointment_time,
-                              duration, appt_type, status, notes, is_emergency, False))
+                values.append((doctor_id, patient_id, appointment_date, appt_type, status, False))
             
             result = execute_values(
                 self.cursor,
                 f'''INSERT INTO "{self.schema}"."Appointment"
-                    ("DoctorId", "PatientId", "AppointmentDate", "AppointmentTime", "DurationMinutes",
-                     "AppointmentType", "Status", "Notes", "IsEmergency", "IsDeleted")
+                    ("DoctorId", "PatientId", "AppointmentDate", "AppointmentType", "Status", "IsDeleted")
                     VALUES %s RETURNING "AppointmentId"''',
                 values,
                 fetch=True
@@ -925,22 +932,25 @@ class DummyDataInserter100K:
             for j in range(batch_count):
                 doctor_id = random.choice(doctor_ids)
                 patient_id = random.choice(patient_ids)
-                report_type = random.choice(['SideEffect', 'Symptom', 'No'])
+                report_type = random.choice(['SideEffect', 'Symptom', 'General'])  # Updated ENUM
                 
                 # Some reports link to prescribed medications
                 prescribed_med_id = random.choice(prescribed_med_ids) if random.random() > 0.5 else None
-                reason = self.generator.fake.sentence() if random.random() > 0.3 else None
+                description = self.generator.fake.text(max_nb_chars=500)  # Changed from reason
+                keywords = ', '.join(self.generator.fake.words(nb=random.randint(3, 6))) if random.random() > 0.5 else None
+                voice_directory = f"/voice/reports/{self.generator.fake.uuid4()}.mp3" if random.random() > 0.3 else None
                 doctor_note = self.generator.fake.text(max_nb_chars=200) if random.random() > 0.5 else None
-                dose_quantity = round(random.uniform(1, 10), 2) if prescribed_med_id else None
+                severity = random.choice(['mild', 'moderate', 'severe'])
+                review_time = self.generator.fake.date_time_between(start_date='-1m', end_date='now') if random.random() > 0.4 else None
                 
                 values.append((doctor_id, patient_id, prescribed_med_id, report_type,
-                              reason, None, doctor_note, dose_quantity, False))
+                              description, keywords, voice_directory, doctor_note, severity, review_time, False))
             
             result = execute_values(
                 self.cursor,
                 f'''INSERT INTO "{self.schema}"."PatientReport"
-                    ("DoctorId", "PatientId", "PrescribedMedicationId", "Type", "Reason",
-                     "AttachmentDirectory", "DoctorNote", "DoseQuantity", "IsDeleted")
+                    ("DoctorId", "PatientId", "PrescribedMedicationId", "Type", "Description",
+                     "Keywords", "VoiceDirectory", "DoctorNote", "Severity", "ReviewTime", "IsDeleted")
                     VALUES %s RETURNING "PatientReportID"''',
                 values,
                 fetch=True
@@ -977,13 +987,11 @@ class DummyDataInserter100K:
                         break
                     
                     onset_date = self.generator.fake.date_between(start_date='-3m', end_date='today')
-                    severity = random.choice(['mild', 'moderate', 'severe', 'life_threatening'])
-                    patient_notes = self.generator.fake.sentence() if random.random() > 0.5 else None
+                    severity = random.choice(['mild', 'moderate', 'severe'])  # Updated ENUM
                     # 60% resolved
                     resolution_date = self.generator.fake.date_between(start_date=onset_date, end_date='today') if random.random() > 0.4 else None
                     
-                    values.append((prescribed_med_id, effect, severity, onset_date,
-                                  patient_notes, resolution_date))
+                    values.append((prescribed_med_id, effect, severity, onset_date, resolution_date))
             
             med_idx += 1
             
@@ -992,15 +1000,14 @@ class DummyDataInserter100K:
                 result = execute_values(
                     self.cursor,
                     f'''INSERT INTO "{self.schema}"."PatientSideEffect"
-                        ("PrescribedMedicationID", "SideEffectName", "Severity", "OnsetDate",
-                         "PatientNotes", "ResolutionDate")
+                        ("PrescribedMedicationId", "SideEffectName", "Severity", "OnsetDate", "ResolutionDate")
                         VALUES %s
-                        ON CONFLICT ("PrescribedMedicationID", "SideEffectName") DO NOTHING
-                        RETURNING "PatientSideEffectID"''',
+                        ON CONFLICT ("PrescribedMedicationId", "SideEffectName") DO NOTHING
+                        RETURNING "PatientSideEffectId"''',
                     values,
                     fetch=True
                 )
-                batch_ids = [row['PatientSideEffectID'] if isinstance(row, dict) else row[0] for row in result]
+                batch_ids = [row['PatientSideEffectId'] if isinstance(row, dict) else row[0] for row in result]
                 side_effect_ids.extend(batch_ids)
                 self.conn.commit()
                 print(f"  ✓ Progress: {len(side_effect_ids):,}/{target_count:,} side effects created", end='\r')
@@ -1011,85 +1018,216 @@ class DummyDataInserter100K:
             result = execute_values(
                 self.cursor,
                 f'''INSERT INTO "{self.schema}"."PatientSideEffect"
-                    ("PrescribedMedicationID", "SideEffectName", "Severity", "OnsetDate",
-                     "PatientNotes", "ResolutionDate")
+                    ("PrescribedMedicationId", "SideEffectName", "Severity", "OnsetDate", "ResolutionDate")
                     VALUES %s
-                    ON CONFLICT ("PrescribedMedicationID", "SideEffectName") DO NOTHING
-                    RETURNING "PatientSideEffectID"''',
+                    ON CONFLICT ("PrescribedMedicationId", "SideEffectName") DO NOTHING
+                    RETURNING "PatientSideEffectId"''',
                 values,
                 fetch=True
             )
-            batch_ids = [row['PatientSideEffectID'] if isinstance(row, dict) else row[0] for row in result]
+            batch_ids = [row['PatientSideEffectId'] if isinstance(row, dict) else row[0] for row in result]
             side_effect_ids.extend(batch_ids)
             self.conn.commit()
         
         print(f"\n  ✓ Created {len(side_effect_ids):,} side effect records")
         return side_effect_ids
     
-    def insert_reminders(self, schedule_ids, appointment_ids, target_count=100000):
-        """Insert reminders for medication schedules and appointments"""
-        print(f"\n🔔 Creating {target_count:,} reminder records...")
+    def insert_medication_adherence_records(self, schedule_ids, target_count=100000):
+        """Insert medication adherence records for medication schedules with violation scenarios"""
+        print(f"\n🔔 Creating {target_count:,} medication adherence records...")
+        print(f"  📊 Generating records with dose violations for sliding window alerts...")
         
         batch_size = 5000
-        reminder_ids = []
+        adherence_ids = []
         values = []
         
-        # Mix of medication reminders and appointment reminders
-        schedule_idx = 0
-        appointment_idx = 0
+        # Get all schedules with their DosePerTime for violation detection
+        schedule_dose_map = {}
         
-        while len(reminder_ids) < target_count:
-            # 80% medication reminders, 20% appointment reminders
-            if random.random() < 0.8 and schedule_idx < len(schedule_ids):
-                schedule_id = schedule_ids[schedule_idx]
-                values.append((schedule_id, None, random.choice([True, False]),
-                              random.choice(['ignored', 'completed']),
-                              timedelta(minutes=random.choice([5, 10, 15, 30]))))
-                schedule_idx += 1
-            elif appointment_idx < len(appointment_ids):
-                appointment_id = appointment_ids[appointment_idx]
-                values.append((None, appointment_id, random.choice([True, False]),
-                              random.choice(['ignored', 'completed']),
-                              timedelta(hours=random.choice([1, 24]))))
-                appointment_idx += 1
-            else:
-                break
+        schedule_idx = 0
+        
+        while len(adherence_ids) < target_count and schedule_idx < len(schedule_ids):
+            schedule_id = schedule_ids[schedule_idx]
+            
+            # Get DosePerTime from PrescribedMedication via schedule
+            if schedule_id not in schedule_dose_map:
+                self.cursor.execute(f'''
+                    SELECT pm."DosePerTime"
+                    FROM "{self.schema}"."PrescribedMedicationSchedule" pms
+                    JOIN "{self.schema}"."PrescribedMedication" pm 
+                        ON pms."PrescribedMedicationId" = pm."PrescribedMedicationId"
+                    WHERE pms."PrescribedMedicationScheduleId" = %s
+                ''', (schedule_id,))
+                result = self.cursor.fetchone()
+                if result:
+                    schedule_dose_map[schedule_id] = float(result['DosePerTime'])
+                else:
+                    schedule_dose_map[schedule_id] = 1.0  # Default fallback
+            
+            dose_per_time = schedule_dose_map[schedule_id]
+            
+            # Each schedule gets 3-7 adherence records (past doses)
+            num_records = random.randint(3, 7)
+            for _ in range(num_records):
+                if len(adherence_ids) + len(values) >= target_count:
+                    break
+                
+                # Status distribution: 60% Taken, 20% Missed, 20% Pending
+                rand = random.random()
+                if rand < 0.6:
+                    current_status = 'Taken'
+                elif rand < 0.8:
+                    current_status = 'Missed'
+                else:
+                    current_status = 'Pending'
+                
+                # Set DoseQuantity based on status and violation scenarios
+                if current_status == 'Missed':
+                    # Missed = NULL dose quantity
+                    dose_quantity = None
+                elif current_status == 'Pending':
+                    # Pending = NULL dose quantity (not taken yet)
+                    dose_quantity = None
+                else:  # Taken
+                    # Distribution of dose scenarios for violation detection:
+                    # 50% correct dose (DoseQuantity = DosePerTime)
+                    # 25% overdose (DoseQuantity > DosePerTime) - VIOLATION for alert
+                    # 25% underdose (DoseQuantity < DosePerTime) - VIOLATION for alert
+                    scenario = random.random()
+                    
+                    if scenario < 0.5:
+                        # Correct dose
+                        dose_quantity = round(dose_per_time, 2)
+                    elif scenario < 0.75:
+                        # Overdose: 10%-50% more than prescribed
+                        overdose_multiplier = random.uniform(1.1, 1.5)
+                        dose_quantity = round(dose_per_time * overdose_multiplier, 2)
+                    else:
+                        # Underdose: 30%-70% of prescribed dose
+                        underdose_multiplier = random.uniform(0.3, 0.7)
+                        dose_quantity = round(dose_per_time * underdose_multiplier, 2)
+                
+                # Generate timestamps
+                scheduled_time = self.generator.fake.date_time_between(start_date='-14d', end_date='now')
+                
+                if current_status == 'Taken':
+                    # Taken: action time within -15 to +60 minutes of scheduled time
+                    action_time = scheduled_time + timedelta(minutes=random.randint(-15, 60))
+                elif current_status == 'Missed':
+                    # Missed: action time is past scheduled time (or NULL)
+                    action_time = scheduled_time + timedelta(hours=random.randint(2, 12)) if random.random() > 0.3 else None
+                else:  # Pending
+                    # Pending: no action time yet
+                    action_time = None
+                
+                values.append((schedule_id, current_status, dose_quantity, scheduled_time, action_time))
+            
+            schedule_idx += 1
             
             # Insert batch
             if len(values) >= batch_size:
                 result = execute_values(
                     self.cursor,
-                    f'''INSERT INTO "{self.schema}"."Reminder"
-                        ("PrescribedMedicationScheduleID", "AppointmentID", "IsActive",
-                         "CurrentStatus", "RemindGap")
+                    f'''INSERT INTO "{self.schema}"."MedicationAdherenceRecord"
+                        ("PrescribedMedicationScheduleId", "CurrentStatus", "DoseQuantity",
+                         "ScheduledTime", "ActionTime")
                         VALUES %s
-                        RETURNING "ReminderID"''',
+                        RETURNING "MedicationAdherenceRecordId"''',
                     values,
                     fetch=True
                 )
-                batch_ids = [row['ReminderID'] if isinstance(row, dict) else row[0] for row in result]
-                reminder_ids.extend(batch_ids)
+                batch_ids = [row['MedicationAdherenceRecordId'] if isinstance(row, dict) else row[0] for row in result]
+                adherence_ids.extend(batch_ids)
                 self.conn.commit()
-                print(f"  ✓ Progress: {len(reminder_ids):,}/{target_count:,} reminders created", end='\r')
+                print(f"  ✓ Progress: {len(adherence_ids):,}/{target_count:,} adherence records created", end='\r')
                 values = []
         
         # Insert remaining
         if values:
             result = execute_values(
                 self.cursor,
-                f'''INSERT INTO "{self.schema}"."Reminder"
-                    ("PrescribedMedicationScheduleID", "AppointmentID", "IsActive",
-                     "CurrentStatus", "RemindGap")
+                f'''INSERT INTO "{self.schema}"."MedicationAdherenceRecord"
+                    ("PrescribedMedicationScheduleId", "CurrentStatus", "DoseQuantity",
+                     "ScheduledTime", "ActionTime")
                     VALUES %s
-                    RETURNING "ReminderID"''',
+                    RETURNING "MedicationAdherenceRecordId"''',
                 values,
                 fetch=True
             )
-            batch_ids = [row['ReminderID'] if isinstance(row, dict) else row[0] for row in result]
+            batch_ids = [row['MedicationAdherenceRecordId'] if isinstance(row, dict) else row[0] for row in result]
+            adherence_ids.extend(batch_ids)
+            self.conn.commit()
+        
+        print(f"\n  ✓ Created {len(adherence_ids):,} medication adherence records")
+        print(f"  ✓ Violation scenarios: ~25% overdose, ~25% underdose, ~20% missed for sliding window alerts")
+        return adherence_ids
+    
+    def insert_appointment_reminders(self, appointment_ids, target_count=50000):
+        """Insert appointment reminders"""
+        print(f"\n📅 Creating {target_count:,} appointment reminder records...")
+        
+        batch_size = 5000
+        reminder_ids = []
+        values = []
+        
+        appointment_idx = 0
+        
+        while len(reminder_ids) < target_count and appointment_idx < len(appointment_ids):
+            appointment_id = appointment_ids[appointment_idx]
+            
+            # Get appointment date
+            self.cursor.execute(f'''
+                SELECT "AppointmentDate" FROM "{self.schema}"."Appointment"
+                WHERE "AppointmentId" = %s
+            ''', (appointment_id,))
+            appt = self.cursor.fetchone()
+            if appt:
+                appt_date = appt['AppointmentDate']
+                # Create reminders 1 day and 1 hour before appointment
+                scheduled_times = [
+                    appt_date - timedelta(days=1),
+                    appt_date - timedelta(hours=1)
+                ]
+                for scheduled_time in scheduled_times:
+                    if len(reminder_ids) + len(values) >= target_count:
+                        break
+                    values.append((appointment_id, scheduled_time))
+            
+            appointment_idx += 1
+            
+            # Insert batch
+            if len(values) >= batch_size:
+                result = execute_values(
+                    self.cursor,
+                    f'''INSERT INTO "{self.schema}"."AppointmentReminder"
+                        ("AppointmentId", "ScheduledTime")
+                        VALUES %s
+                        RETURNING "AppointmentReminderId"''',
+                    values,
+                    fetch=True
+                )
+                batch_ids = [row['AppointmentReminderId'] if isinstance(row, dict) else row[0] for row in result]
+                reminder_ids.extend(batch_ids)
+                self.conn.commit()
+                print(f"  ✓ Progress: {len(reminder_ids):,}/{target_count:,} appointment reminders created", end='\r')
+                values = []
+        
+        # Insert remaining
+        if values:
+            result = execute_values(
+                self.cursor,
+                f'''INSERT INTO "{self.schema}"."AppointmentReminder"
+                    ("AppointmentId", "ScheduledTime")
+                    VALUES %s
+                    RETURNING "AppointmentReminderId"''',
+                values,
+                fetch=True
+            )
+            batch_ids = [row['AppointmentReminderId'] if isinstance(row, dict) else row[0] for row in result]
             reminder_ids.extend(batch_ids)
             self.conn.commit()
         
-        print(f"\n  ✓ Created {len(reminder_ids):,} reminder records")
+        print(f"\n  ✓ Created {len(reminder_ids):,} appointment reminder records")
         return reminder_ids
     
     def validate_data_integrity(self):
@@ -1107,10 +1245,10 @@ class DummyDataInserter100K:
                 LEFT JOIN "{self.schema}"."User" u ON d."UserId" = u."UserId"
                 WHERE u."UserId" IS NULL
             '''),
-            ("Duplicate AssignedDoctor", f'''
+            ("Duplicate PatientCareTeam", f'''
                 SELECT COUNT(*) as count FROM (
                     SELECT "DoctorId", "PatientId", "DoctorLevel", COUNT(*)
-                    FROM "{self.schema}"."AssignedDoctor"
+                    FROM "{self.schema}"."PatientCareTeam"
                     GROUP BY "DoctorId", "PatientId", "DoctorLevel"
                     HAVING COUNT(*) > 1
                 ) AS dups
@@ -1203,8 +1341,8 @@ class DummyDataInserter100K:
             # Phase 5: Medications
             medication_ids = self.insert_medications(institution_ids)
             
-            # Phase 6: Doctor-Patient Relationships
-            assigned_doctor_ids = self.insert_assigned_doctors(doctor_ids, patient_ids, 500000)
+            # Phase 6: Doctor-Patient Care Team Relationships
+            care_team_ids = self.insert_patient_care_teams(doctor_ids, patient_ids, 500000)
             
             # Phase 7: Medical Histories & Symptoms
             medical_history_ids = self.insert_medical_histories(patient_ids, 500000)
@@ -1222,8 +1360,9 @@ class DummyDataInserter100K:
             report_ids = self.insert_patient_reports(doctor_ids, patient_ids, prescribed_med_ids, 300000)
             side_effect_ids = self.insert_side_effects(prescribed_med_ids, 200000)
             
-            # Phase 11: Reminders
-            reminder_ids = self.insert_reminders(schedule_ids, appointment_ids, 500000)
+            # Phase 11: Medication Adherence Records & Appointment Reminders
+            adherence_ids = self.insert_medication_adherence_records(schedule_ids, 500000)
+            appointment_reminder_ids = self.insert_appointment_reminders(appointment_ids, 200000)
             
             # Phase 12: Validation
             is_valid = self.validate_data_integrity()
@@ -1249,7 +1388,7 @@ class DummyDataInserter100K:
             print(f"  • Doctors: {len(doctor_ids):,}")
             print(f"  • Patients: {len(patient_ids):,}")
             print(f"  • Medications: {len(medication_ids):,}")
-            print(f"  • Assigned Doctors: {len(assigned_doctor_ids):,}")
+            print(f"  • Patient Care Teams: {len(care_team_ids):,}")
             print(f"  • Medical Histories: {len(medical_history_ids):,}")
             print(f"  • Patient Symptoms: {len(patient_symptom_ids):,}")
             print(f"  • Prescriptions: {len(prescription_ids):,}")
@@ -1258,13 +1397,14 @@ class DummyDataInserter100K:
             print(f"  • Appointments: {len(appointment_ids):,}")
             print(f"  • Patient Reports: {len(report_ids):,}")
             print(f"  • Side Effects: {len(side_effect_ids):,}")
-            print(f"  • Reminders: {len(reminder_ids):,}")
+            print(f"  • Medication Adherence Records: {len(adherence_ids):,}")
+            print(f"  • Appointment Reminders: {len(appointment_reminder_ids):,}")
             
             total_records = (len(institution_ids) + 1 + len(admin_ids) + len(doctor_ids) + 
-                           len(patient_ids) + len(medication_ids) + len(assigned_doctor_ids) +
+                           len(patient_ids) + len(medication_ids) + len(care_team_ids) +
                            len(medical_history_ids) + len(patient_symptom_ids) + len(prescription_ids) +
                            len(prescribed_med_ids) + len(schedule_ids) + len(appointment_ids) +
-                           len(report_ids) + len(side_effect_ids) + len(reminder_ids))
+                           len(report_ids) + len(side_effect_ids) + len(adherence_ids) + len(appointment_reminder_ids))
             
             print(f"\n  📈 TOTAL RECORDS CREATED: {total_records:,}")
             print(f"\n✨ Data Validation: {'✓ PASSED' if is_valid else '⚠️ WARNINGS FOUND'}")
@@ -1332,7 +1472,8 @@ class DummyDataInserter100K:
             # Clear in reverse dependency order
             tables_to_clear = [
                 # Level 7 - Deepest dependencies
-                'Reminder',
+                'MedicationAdherenceRecord',
+                'AppointmentReminder',
                 # Level 6
                 'PatientSideEffect',
                 'PrescribedMedicationSchedule',
@@ -1344,7 +1485,7 @@ class DummyDataInserter100K:
                 'Prescription',
                 'Appointment',
                 'MedicalHistory',
-                'AssignedDoctor',
+                'PatientCareTeam',
                 # Level 3
                 'Admin',
                 'Doctor',
@@ -1358,7 +1499,7 @@ class DummyDataInserter100K:
                 'UserLog', 'PrescriptionLog', 'PrescribedMedicationLog',
                 'PrescribedMedicationScheduleLog', 'MedicalHistoryLog',
                 'PatientReportLog', 'PatientSideEffectLog', 'MedicationLog',
-                'AppointmentLog', 'AssignedDoctorLog', 'AuditLog'
+                'AppointmentLog', 'AuditLog'
             ]
             
             total_deleted = 0
