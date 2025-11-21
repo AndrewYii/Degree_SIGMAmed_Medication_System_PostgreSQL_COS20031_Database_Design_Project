@@ -98,7 +98,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
+COMMENT ON FUNCTION "SIGMAmed".generate_patient_number IS 'Automatically generate the patient number of patients.';
 -- TRIGGER: Auto-generate Patient Number
 CREATE TRIGGER trigger_generate_patient_number
 BEFORE INSERT ON "SIGMAmed"."Patient"
@@ -115,6 +115,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".prevent_delete_active_prescription IS 'Prevent deleting the active prescriptions.';
 
 -- TRIGGER: Prevent deleting active prescriptions
 CREATE TRIGGER trigger_prevent_delete_active_prescription
@@ -130,13 +131,14 @@ BEGIN
         RAISE EXCEPTION 'Cannot create appointment in the past';
     END IF;
     
-    IF NEW."AppointmentDate" = CURRENT_DATE AND NEW."AppointmentTime" < CURRENT_TIME THEN
+    IF NEW."AppointmentDate" = CURRENT_DATE THEN
         RAISE EXCEPTION 'Cannot create appointment in the past';
     END IF;
     
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".prevent_past_appointments IS 'Prevent past appointment creation.';
 
 -- TRIGGER: Prevent past appointments
 CREATE TRIGGER trigger_prevent_past_appointments
@@ -144,42 +146,25 @@ BEFORE INSERT ON "SIGMAmed"."Appointment"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".prevent_past_appointments();
 
--- TRIGGER: Notify doctor when new patient reports comes in
-CREATE OR REPLACE FUNCTION "SIGMAmed".notify_new_report()
+-- FUNCTION: Notify doctor when new patient reports comes in
+CREATE OR REPLACE FUNCTION "SIGMAmed".notify_extract_keyword()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW."ReviewTime" IS NULL THEN
-        PERFORM pg_notify('new_patient_report',NEW."PatientReportID"::text);
+    -- Only notify if Description is not null and Keywords still null
+    IF NEW."Description" IS NOT NULL AND NEW."Keywords" IS NULL THEN
+        PERFORM pg_notify('report_ready_for_processing', NEW."PatientReportId"::text);
     END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".notify_extract_keyword IS 'Notify doctor when new patient reports comes in.';
 
-CREATE TRIGGER trg_notify_new_report
-AFTER INSERT ON "SIGMAmed"."PatientReport"
+CREATE TRIGGER patient_report_update_trigger
+AFTER UPDATE OF "Description" ON "SIGMAmed"."PatientReport"
 FOR EACH ROW
-EXECUTE FUNCTION "SIGMAmed".notify_new_report();
+EXECUTE FUNCTION "SIGMAmed".notify_extract_keyword();
 
--- TRIGGER: Notify after doctor review
-CREATE OR REPLACE FUNCTION "SIGMAmed".notify_review_report()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD."ReviewTime" IS NULL AND NEW."ReviewTime" IS NOT NULL THEN
-        PERFORM pg_notify('report_ready_for_processing',NEW."PatientReportID"::text);
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_notify_type_updated
-AFTER UPDATE ON "SIGMAmed"."PatientReport"
-FOR EACH ROW
-WHEN (NEW."ReviewTime" IS NOT NULL)
-EXECUTE FUNCTION "SIGMAmed".notify_review_report();
-
--- TRIGGER: Auto create the prescribed medication schedule record in Prescribed Medication schedule
+-- FUNCTION: Auto create the prescribed medication schedule record in Prescribed Medication schedule
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_generate_medication_schedule()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -212,13 +197,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".fn_generate_medication_schedule IS 'Auto create the prescribed medication schedule record in Prescribed Medication schedule.';
 
 CREATE TRIGGER trg_after_prescribed_med_insert
 AFTER INSERT ON "SIGMAmed"."PrescribedMedication"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_generate_medication_schedule();
 
--- TRIGGER: Auto create the adherence record in Medication adherence 
+-- FUNCTION: Auto create the adherence record in Medication adherence 
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_create_adherence_record()
 RETURNS TRIGGER AS $$
 DECLARE 
@@ -264,7 +250,7 @@ BEGIN
             
             IF scheduled_timestamp > CURRENT_TIMESTAMP THEN
             INSERT INTO "SIGMAmed"."MedicationAdherenceRecord"(
-                "PrescribedMedicationScheduleID",
+                "PrescribedMedicationScheduleId",
                 "DoseQuantity",
                 "ScheduledTime"
             )
@@ -282,6 +268,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".fn_create_adherence_record IS 'Auto create the adherence record in Medication adherence.';
 
 
 CREATE TRIGGER trg_after_insert_schedule
@@ -290,23 +277,25 @@ FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_create_adherence_record();
 
 
--- TRIGGER: Delete all old adherence
+-- FUNCTION: Delete all old adherence
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_delete_old_adherence()
 RETURNS TRIGGER AS $$
 BEGIN
     DELETE FROM "SIGMAmed"."MedicationAdherenceRecord"
-    WHERE "PrescribedMedicationScheduleID" = OLD."PrescribedMedicationScheduleId" AND "CurrentStatus" = 'Pending' AND "ScheduledTime" > NOW();
+    WHERE "PrescribedMedicationScheduleId" = OLD."PrescribedMedicationScheduleId" AND "CurrentStatus" = 'Pending' AND "ScheduledTime" > NOW();
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".fn_create_adherence_record IS 'Delete all old adherence records in MedicationAdherenceRecordTable.';
 
 CREATE TRIGGER trg_before_update_delete_adherence
 BEFORE UPDATE ON "SIGMAmed"."PrescribedMedicationSchedule"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_delete_old_adherence();
 
--- TRIGGER: Create the adherence record based on new day of week mask
+
+-- FUNCTION: Create the adherence record based on new day of week mask
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_create_adherence_after_change()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -351,7 +340,7 @@ BEGIN
             scheduled_timestamp := check_date + NEW."ReminderTime";
 
             INSERT INTO "SIGMAmed"."MedicationAdherenceRecord"(
-                "PrescribedMedicationScheduleID",
+                "PrescribedMedicationScheduleId",
                 "DoseQuantity",
                 "ScheduledTime"
             ) VALUES (
@@ -367,6 +356,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".fn_create_adherence_after_change IS 'Create the adherence record based on new day of week mask.';
 
 CREATE TRIGGER trg_after_insert_update_create_adherence
 AFTER INSERT OR UPDATE ON "SIGMAmed"."PrescribedMedicationSchedule"
@@ -374,7 +364,7 @@ FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_create_adherence_after_change();
 
 
--- TRIGGER: Delete the related record in prescribed medication schedule table and medication adherence record table
+-- FUNCTION: Delete the related record in prescribed medication schedule table and medication adherence record table
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -388,7 +378,7 @@ BEGIN
 
         -- 1. Delete adherence records (they reference schedule IDs)
         DELETE FROM "SIGMAmed"."MedicationAdherenceRecord"
-        WHERE "PrescribedMedicationScheduleID" IN (
+        WHERE "PrescribedMedicationScheduleId" IN (
             SELECT "PrescribedMedicationScheduleId"
             FROM "SIGMAmed"."PrescribedMedicationSchedule"
             WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId"
@@ -422,6 +412,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change IS 'Delete the related record in prescribed medication schedule table and medication adherence record table.';
 
 CREATE TRIGGER trg_after_mask_update
 AFTER UPDATE OF "DefaultDayMask"
@@ -429,13 +420,13 @@ ON "SIGMAmed"."PrescribedMedication"
 FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change();
 
--- TRIGGER: Create record inside appointment reminder table 
+-- FUNCTION: Create record inside appointment reminder table 
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_generate_appointment_reminders()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Insert reminder 1 day before
     INSERT INTO "SIGMAmed"."AppointmentReminder"(
-        "AppointmentID",
+        "AppointmentId",
         "ScheduledTime"
     ) VALUES (
         NEW."AppointmentId",
@@ -444,7 +435,7 @@ BEGIN
 
     -- Insert reminder 1 hour before
     INSERT INTO "SIGMAmed"."AppointmentReminder"(
-        "AppointmentID",
+        "AppointmentId",
         "ScheduledTime"
     ) VALUES (
         NEW."AppointmentId",
@@ -454,6 +445,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".fn_generate_appointment_reminders IS 'Create record inside appointment reminder table.';
 
 CREATE TRIGGER trg_after_appointment_insert
 AFTER INSERT ON "SIGMAmed"."Appointment"
@@ -461,3 +453,262 @@ FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_generate_appointment_reminders();
 
 
+-- FUNCTION: Send listener to channel for newly insert patient report record
+CREATE OR REPLACE FUNCTION "SIGMAmed".notify_new_patient_report()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Only notify if VoiceDirectory is NOT NULL and keyword IS NULL
+    IF NEW."VoiceDirectory" IS NOT NULL AND (NEW."Description" IS NULL OR NEW."Description" = '') AND NEW."Keywords" IS NULL THEN
+        PERFORM pg_notify(
+            'new_patient_report', 
+            json_build_object(
+                'voice_path', NEW."VoiceDirectory",
+                'report_id', NEW."PatientReportId"
+            )::text
+        );
+    ELSIF NEW."Description" IS NOT NULL AND NEW."Keywords" IS NULL THEN
+        PERFORM pg_notify('new_desc_patient_report',NEW."PatientReportId"::text);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION "SIGMAmed".notify_new_patient_report IS 'Send listener to channel for newly insert patient report record.';
+
+-- Attach trigger to PatientReport table after insert
+CREATE TRIGGER patient_report_insert_trigger
+AFTER INSERT ON "SIGMAmed"."PatientReport"
+FOR EACH ROW
+EXECUTE FUNCTION "SIGMAmed".notify_new_patient_report();
+
+-- FUNCTION: Automatically sets the "UpdatedAt" column to the current timestamp on update
+CREATE OR REPLACE FUNCTION public.set_updated_at_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if UpdatedAt column exists in the table structure before setting
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = TG_TABLE_SCHEMA
+        AND table_name = TG_TABLE_NAME
+        AND column_name = 'UpdatedAt'
+    ) THEN
+        NEW."UpdatedAt" = NOW();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION public.set_updated_at_timestamp() IS 'Automatically sets the "UpdatedAt" column to the current timestamp on update.';
+
+CREATE TRIGGER set_updated_at_ClinicalInstitution
+BEFORE UPDATE ON "SIGMAmed"."ClinicalInstitution"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_Medication
+BEFORE UPDATE ON "SIGMAmed"."Medication"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_User
+BEFORE UPDATE ON "SIGMAmed"."User"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_MedicalHistory
+BEFORE UPDATE ON "SIGMAmed"."MedicalHistory"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+-- CREATE TRIGGER set_updated_at_PatientSymptom
+-- BEFORE UPDATE ON "SIGMAmed"."PatientSymptom"
+-- FOR EACH ROW
+-- EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_PatientCareTeam
+BEFORE UPDATE ON "SIGMAmed"."PatientCareTeam"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_Prescription
+BEFORE UPDATE ON "SIGMAmed"."Prescription"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_PrescribedMedication
+BEFORE UPDATE ON "SIGMAmed"."PrescribedMedication"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+-- CREATE TRIGGER set_updated_at_PatientSideEffect
+-- BEFORE UPDATE ON "SIGMAmed"."PatientSideEffect"
+-- FOR EACH ROW
+-- EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_PrescribedMedicationSchedule
+BEFORE UPDATE ON "SIGMAmed"."PrescribedMedicationSchedule"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+-- CREATE TRIGGER set_updated_at_PatientReport
+-- BEFORE UPDATE ON "SIGMAmed"."PatientReport"
+-- FOR EACH ROW
+-- EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+CREATE TRIGGER set_updated_at_Appointment
+BEFORE UPDATE ON "SIGMAmed"."Appointment"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+-- FUNCTION: Capture the User id and record id to insert inside the audit log table
+CREATE OR REPLACE FUNCTION "SIGMAmed".audit_log_capture_function()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_old_data JSONB;
+    v_new_data JSONB;
+    v_record_id UUID;
+	v_action_status "SIGMAmed".action_type_enum;
+    
+    -- The fallback ID must exist in the "SIGMAmed"."User" table (e.g., the 'system_audit' user).
+    SYSTEM_FALLBACK_ID CONSTANT UUID := '00000000-0000-0000-0000-000000000000';
+    
+    -- Variable to hold the final ActedBy ID
+    v_acted_by UUID; 
+BEGIN
+    -- 1. Get the ActedBy User ID
+    -- Safely read the 'app.current_user_id' session variable (set by the application). 
+    -- If the session variable is not set (TRUE prevents error) or is an empty string, 
+    -- COALESCE falls back to the defined SYSTEM_FALLBACK_ID.
+    v_acted_by := COALESCE(
+        NULLIF(current_setting('app.current_user_id', TRUE), '')::UUID,
+        SYSTEM_FALLBACK_ID
+    );
+    
+    -- 2. Determine old/new data and find the RecordId based on the operation
+    IF (TG_OP = 'DELETE') THEN
+    -- ... (rest of the logic remains the same) ...
+        v_action_status := 'delete';
+        v_old_data = to_jsonb(OLD);
+        v_new_data = '[]'::jsonb;
+        
+    ELSIF (TG_OP = 'INSERT') THEN
+        v_action_status := 'insert';
+        v_old_data = '[]'::jsonb;
+        v_new_data = to_jsonb(NEW);
+        
+    ELSIF (TG_OP = 'UPDATE') THEN
+        v_action_status := 'update';
+        v_old_data = to_jsonb(OLD);
+        v_new_data = to_jsonb(NEW);
+        
+    ELSE
+        RETURN NULL; 
+    END IF;
+
+    -- 3. Dynamically extract the Primary Key (RecordId)
+    v_record_id = COALESCE(
+        v_new_data ->> (REPLACE(TG_TABLE_NAME, 'Id', '') || 'Id'), -- Tries to find 'TableNameId'
+        v_new_data ->> 'UserId', -- Tries to find 'UserId'
+        v_old_data ->> (REPLACE(TG_TABLE_NAME, 'Id', '') || 'Id'),
+        v_old_data ->> 'UserId'
+    )::UUID;
+
+    -- 4. Insert the audit record into the AuditLog table
+    INSERT INTO "SIGMAmed"."AuditLog" ("ActedBy", "TableName", "RecordId", "ActionStatus", "OldValue", "NewValue")
+    VALUES (
+        v_acted_by, 
+        TG_TABLE_NAME, 
+        v_record_id, 
+        v_action_status, 
+        v_old_data, 
+        v_new_data
+    );
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+COMMENT ON FUNCTION "SIGMAmed".audit_log_capture_function() IS 'Capture the User id and record id to insert inside the audit log table.';
+
+-- Table 1: ClinicalInstitution (CI)
+CREATE TRIGGER audit_ci_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."ClinicalInstitution"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 2: Medication (Med)
+CREATE TRIGGER audit_med_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Medication"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 3: User (Usr)
+CREATE TRIGGER audit_usr_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."User"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 5: Admin (Adm)
+CREATE TRIGGER audit_adm_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Admin"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 6: Doctor (Doc)
+CREATE TRIGGER audit_doc_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Doctor"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 7: Patient (Pnt)
+CREATE TRIGGER audit_pnt_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Patient"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 8: Medical History (MH)
+CREATE TRIGGER audit_mh_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."MedicalHistory"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 9: Patient Symptom (PSym)
+-- CREATE TRIGGER audit_psym_all
+-- AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientSymptom"
+-- FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 10: Patient Care Team (PCT)
+CREATE TRIGGER audit_pct_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientCareTeam"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 11: Prescription (Presc)
+CREATE TRIGGER audit_presc_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Prescription"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 12: Prescribed Medication (PMed)
+CREATE TRIGGER audit_pmed_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PrescribedMedication"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- -- Table 13: Patient Side Effect (PSE)
+-- CREATE TRIGGER audit_pse_all
+-- AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientSideEffect"
+-- FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 14: Prescribed Medication Schedule (PMS)
+CREATE TRIGGER audit_pms_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PrescribedMedicationSchedule"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 15: Medication Adherence Record (MAR)
+CREATE TRIGGER audit_mar_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."MedicationAdherenceRecord"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 16: Patient Report (PR)
+-- CREATE TRIGGER audit_pr_all
+-- AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientReport"
+-- FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 17: Appointment (Appt)
+CREATE TRIGGER audit_appt_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Appointment"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+
+-- Table 18: Appointment Reminder (AR)
+CREATE TRIGGER audit_ar_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."AppointmentReminder"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();

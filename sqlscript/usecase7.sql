@@ -10,6 +10,8 @@ DECLARE
     user_id UUID;
     medical_history1_id UUID;
     medical_history2_id UUID;
+    hospital_admin_id UUID;
+    hospital_doctor_id UUID;
 BEGIN
     -- Get user ID
     SELECT "UserId"
@@ -20,6 +22,13 @@ BEGIN
 
 -- For dummy data 
 -- Insert into the previous medical history table
+-- Select the hospital admin role for Gleaneagles Hospital
+-- Select the doctor id from new hospital
+    SELECT "UserId"
+    FROM "SIGMAmed"."User" INTO hospital_doctor_id
+    WHERE "ICPassportNumber" = 'GH2849372949';
+RAISE NOTICE 'Switching ActedBy user to hospital doctor ID: %', hospital_doctor_id;
+EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_doctor_id);
 INSERT INTO "SIGMAmed"."MedicalHistory" (
     "PatientId",
     "DiseaseName",
@@ -186,7 +195,6 @@ SELECT
     PSE."SideEffectName",
     PSE."Severity",
     PSE."OnsetDate",
-    PSE."PatientNotes",
     PSE."ResolutionDate"
 FROM "SIGMAmed"."Prescription" AS P
 INNER JOIN "SIGMAmed"."PrescribedMedication" AS PM
@@ -194,7 +202,7 @@ INNER JOIN "SIGMAmed"."PrescribedMedication" AS PM
 INNER JOIN "SIGMAmed"."User" AS U
     ON P."PatientId" = U."UserId"
 INNER JOIN "SIGMAmed"."PatientSideEffect" AS PSE
-    ON PM."PrescribedMedicationId" = PSE."PrescribedMedicationID"
+    ON PM."PrescribedMedicationId" = PSE."PrescribedMedicationId"
 WHERE P."IsDeleted" = FALSE;
 
 -- View query

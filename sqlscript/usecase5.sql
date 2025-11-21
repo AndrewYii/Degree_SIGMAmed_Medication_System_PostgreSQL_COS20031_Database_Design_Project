@@ -10,6 +10,7 @@ BEGIN;
 DO $$
 DECLARE 
     hospital_id UUID;
+    hospital_admin_id UUID;
 BEGIN
 -- Check whether that medication name exists before
     IF EXISTS (
@@ -22,12 +23,25 @@ BEGIN
     END IF;
 
 -- Select the clinical institution id of Gleaneagles Hospital
-    SELECT "ClinicalInstitutionID" INTO hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital' AND 
+    SELECT "ClinicalInstitutionId" INTO hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital' AND 
     "IsDeleted"=FALSE;
+-- Select the hospital admin role for Gleaneagles Hospital
+SELECT u."UserId" INTO hospital_admin_id
+FROM "SIGMAmed"."User" AS u
+JOIN "SIGMAmed"."ClinicalInstitution" AS ci
+ON u."ClinicalInstitutionId" = ci."ClinicalInstitutionId"
+JOIN "SIGMAmed"."Admin" AS ad
+ON u."UserId" = ad."UserId"
+WHERE ci."ClinicalInstitutionName" = 'Gleaneagles Hospital'
+AND u."Role" = 'admin'
+AND ad."AdminLevel"='hospital'
+AND u."IsDeleted" = FALSE;
+RAISE NOTICE 'Switching ActedBy user to hospital admin ID: %', hospital_admin_id;
+EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_id);
 
 -- Insert the new medication inside the medication table
 INSERT INTO "SIGMAmed"."Medication" (
-    "ClinicalInstitutionID",
+    "ClinicalInstitutionId",
     "MedicationName",
     "Unit",
     "IsDeleted",
@@ -45,7 +59,7 @@ INSERT INTO "SIGMAmed"."Medication" (
 );
 
 INSERT INTO "SIGMAmed"."Medication" (
-    "ClinicalInstitutionID",
+    "ClinicalInstitutionId",
     "MedicationName",
     "Unit",
     "IsDeleted",
@@ -63,7 +77,7 @@ INSERT INTO "SIGMAmed"."Medication" (
 );
 
 INSERT INTO "SIGMAmed"."Medication" (
-    "ClinicalInstitutionID",
+    "ClinicalInstitutionId",
     "MedicationName",
     "Unit",
     "IsDeleted",

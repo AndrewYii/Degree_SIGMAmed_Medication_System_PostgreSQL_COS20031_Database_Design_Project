@@ -17,7 +17,11 @@ DECLARE
     new_hospital_id UUID;
     new_user_id UUID;
     new_role "SIGMAmed".user_role_enum;
+    super_admin_id UUID;
 BEGIN
+    -- Select the super_admin_id
+    SELECT "UserId" INTO super_admin_id FROM "SIGMAmed"."Admin" WHERE "AdminLevel"='super';
+
     SELECT EXISTS (
         SELECT 1
         FROM "SIGMAmed"."ClinicalInstitution"
@@ -40,6 +44,10 @@ BEGIN
         RAISE EXCEPTION 'Hospital and Admin already exist';
     ELSIF hospital_exists THEN
         RAISE NOTICE 'Hospital already exists, only inserting admin';
+
+        RAISE NOTICE 'Switching ActedBy user to Super admin ID: %', super_admin_id;
+        EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(super_admin_id);
+
         -- insert admin code here
         INSERT INTO "SIGMAmed"."User" (
             "ClinicalInstitutionId",
@@ -59,7 +67,7 @@ BEGIN
             new_hospital_id, 
             'jaome.moore101335',                    
             'jaome88@gmail.com',                   
-            crypt('jaome123', gen_salt('bf')),  
+            crypt('jaome123', gen_salt('bf'::text)),  
             'admin', 
             '739547397hs8437',
             'Jaome',
@@ -74,6 +82,8 @@ BEGIN
     ELSIF admin_exists THEN
         RAISE NOTICE 'Admin already exists';
     ELSE
+        RAISE NOTICE 'Switching ActedBy user to Super admin ID: %', super_admin_id;
+        EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(super_admin_id);
         -- insert hospital and admin code here
         INSERT INTO "SIGMAmed"."ClinicalInstitution" (
             "ClinicalInstitutionName",
@@ -86,7 +96,7 @@ BEGIN
             NOW(),                   
             NOW()                      
         )
-        RETURNING "ClinicalInstitutionID" INTO new_hospital_id;
+        RETURNING "ClinicalInstitutionId" INTO new_hospital_id;
         INSERT INTO "SIGMAmed"."User" (
             "ClinicalInstitutionId",
             "Username",
@@ -104,7 +114,7 @@ BEGIN
             new_hospital_id, 
             'jaome.moore101335',                    
             'jaome88@gmail.com',                   
-            crypt('jaome123', gen_salt('bf')),  
+            crypt('jaome123', gen_salt('bf'::text)),  
             'admin', 
             '739547397hs8437',
             'Jaome',
@@ -118,5 +128,6 @@ BEGIN
     END IF;
 
 END $$;
+
 -- Commit transaction
 COMMIT;

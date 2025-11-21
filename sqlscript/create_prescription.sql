@@ -11,9 +11,9 @@ CREATE TABLE "SIGMAmed"."Prescription" (
     "PatientId" UUID NOT NULL REFERENCES "SIGMAmed"."Patient"("UserId") ON DELETE CASCADE,
     "PrescriptionNumber" VARCHAR(50) UNIQUE NOT NULL,
     "Status" "SIGMAmed".prescription_status_enum NOT NULL,
-    "PrescribedDate" DATE NOT NULL,
+    "PrescribedDate" TIMESTAMPTZ NOT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
-    "ExpiryDate" DATE NOT NULL,
+    "ExpiryDate" TIMESTAMPTZ NOT NULL,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),
     "UpdatedAt" TIMESTAMPTZ DEFAULT NOW()
 );

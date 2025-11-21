@@ -15,13 +15,29 @@ DECLARE
     danielchester_hospital_id UUID;
     danielchester_doctor_id UUID;
     previous_assigned_doctor BOOLEAN;
+    hospital_admin_id UUID;
+    new_hospital_admin_id UUID;
+    new_hospital_doctor_id UUID;
 BEGIN
 -- Select the patient based on ICPassportNumber
     SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
 
 -- Select the clinical institution id of new hospital
-    SELECT "ClinicalInstitutionID" INTO new_hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital' AND 
+    SELECT "ClinicalInstitutionId" INTO new_hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital' AND 
     "IsDeleted"=FALSE;
+-- Select the hospital admin role for Gleaneagles Hospital
+SELECT u."UserId" INTO hospital_admin_id
+FROM "SIGMAmed"."User" AS u
+JOIN "SIGMAmed"."ClinicalInstitution" AS ci
+ON u."ClinicalInstitutionId" = ci."ClinicalInstitutionId"
+JOIN "SIGMAmed"."Admin" AS ad
+ON u."UserId" = ad."UserId"
+WHERE ci."ClinicalInstitutionName" = 'Gleaneagles Hospital'
+AND u."Role" = 'admin'
+AND ad."AdminLevel"='hospital'
+AND u."IsDeleted" = FALSE;
+RAISE NOTICE 'Switching ActedBy user to hospital admin ID: %', hospital_admin_id;
+EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_id);
 
 -- Update the clinical institution id for the patient
     UPDATE "SIGMAmed"."User"
@@ -34,18 +50,12 @@ BEGIN
     SELECT EXISTS (
         SELECT 1
         FROM "SIGMAmed"."ClinicalInstitution"
-        WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital'
+        WHERE "ClinicalInstitutionName" = 'Danielchester Medical Center'
           AND "IsDeleted" = FALSE
     ) INTO hospital_exists;
     IF hospital_exists THEN
-        SELECT "ClinicalInstitutionID" INTO danielchester_hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital' AND 
+        SELECT "ClinicalInstitutionId" INTO danielchester_hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Danielchester Medical Center' AND 
         "IsDeleted"=FALSE;
-    ELSE
-        INSERT INTO "SIGMAmed"."ClinicalInstitution" (
-            "ClinicalInstitutionName"
-        ) VALUES (
-            'Danielchester Medical Center'
-        ) RETURNING "ClinicalInstitutionID" INTO danielchester_hospital_id;
     END IF;
     -- Insert into doctor
     INSERT INTO "SIGMAmed"."User" (
@@ -100,13 +110,17 @@ BEGIN
         WHERE "PatientId" = user_id
         AND "IsActive" = TRUE;
     END IF;
+    -- Select the doctor id from new hospital
+    SELECT "UserId"
+    FROM "SIGMAmed"."User" INTO new_hospital_doctor_id
+    WHERE "ICPassportNumber" = 'GH2849372949';
     -- Insert new patient care team record in patient care team
     INSERT INTO "SIGMAmed"."PatientCareTeam" (
         "DoctorId",
         "PatientId",
         "DoctorLevel"
     ) VALUES (
-        '2595018b-69fd-4435-9c8e-3eaa91ef5bae', 
+        new_hospital_doctor_id, 
         user_id,      
         'primary'
     );

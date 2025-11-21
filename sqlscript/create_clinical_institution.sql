@@ -8,7 +8,7 @@ BEGIN;
 
 CREATE TABLE "SIGMAmed"."ClinicalInstitution" (
     -- for supabase, need to use extensions.uuid_generate_v4()
-    "ClinicalInstitutionID" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "ClinicalInstitutionId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "ClinicalInstitutionName" VARCHAR(100) NOT NULL,
     "IsDeleted" BOOLEAN DEFAULT FALSE,
     "CreatedAt" TIMESTAMPTZ DEFAULT NOW(),

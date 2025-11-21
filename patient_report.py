@@ -3,6 +3,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import date
 from db_config import DBConfig
+import re
+import spacy
 
 class Extract_keyword:
     def __init__(self):
@@ -23,23 +25,22 @@ class Extract_keyword:
         except Exception as e:
             print(f"✗ Failed to connect to database: {e}")
             raise
-
-    # Fetch a single report by ID
+        
     def fetch_single_report(self, report_id):
         query = f"""
-            SELECT "PatientReportID", "PrescribedMedicationId", "Description",
-                   "Type", "Severity", "PatientId"
+            SELECT *
             FROM "{self.schema}"."PatientReport"
-            WHERE "PatientReportID" = %s
+            WHERE "PatientReportId" = %s
               AND "IsDeleted" = FALSE
-              AND "IsProcessed" = FALSE
         """
         self.cursor.execute(query, (report_id,))
         return self.cursor.fetchone()
-
+    
     # Fully dynamic extraction
-    def extract_medical_keywords(self, text):
-        doc = self.nlp(text)
+    def extract_medical_keywords(self, description):
+        no_quotes_description = description.replace("'", "")
+        cleaned_description = re.sub(r'\s+', ' ', no_quotes_description).strip()
+        doc = self.nlp(cleaned_description)
         results = set()
 
         for ent in doc.ents:
@@ -53,24 +54,13 @@ class Extract_keyword:
 
         return results
 
-    # Insert side effects
-    def insert_side_effect(self, prescribedMedication_id, sideEffects, severity):
-        for effect in sideEffects:
-            self.cursor.execute(f"""
-                INSERT INTO "{self.schema}"."PatientSideEffect"(
-                    "PrescribedMedicationID", "SideEffectName", "Severity", "OnsetDate"
-                ) VALUES (%s, %s, %s, %s)
-                ON CONFLICT ("PrescribedMedicationID", "SideEffectName") DO NOTHING
-            """, (prescribedMedication_id, effect, severity, date.today()))
-
-    # Insert symptoms
-    def insert_symptom(self, patient_id, symptoms, severity):
-        for symptom in symptoms:
-            self.cursor.execute(f"""
-                INSERT INTO "{self.schema}"."PatientSymptom"(
-                    "PatientId", "SymptomName", "Severity"
-                ) VALUES (%s, %s, %s)
-            """, (patient_id, symptom, severity))
+    # Insert into description
+    def insert_keywords(self, record_id, keywords):
+        self.cursor.execute(f"""
+            UPDATE "{self.schema}"."PatientReport"
+            SET "Keywords" = %s
+            WHERE "PatientReportId" = %s
+        """, (keywords, record_id))
 
     # Process a single report
     def process_single_report(self, report_id):
@@ -79,13 +69,11 @@ class Extract_keyword:
             print(f"[SKIP] Report {report_id} already processed or not found.")
             return
 
-        keywords = self.extract_medical_keywords(report["Description"])
+        keywords = self.extract_medical_keywords(report['Description'])
+        keywords_str = ", ".join(keywords)
         print(f"[DEBUG] Extracted keywords: {keywords}")
 
-        if report["Type"] == "SideEffect":
-            self.insert_side_effect(report["PrescribedMedicationId"], keywords, report["Severity"])
-        elif report["Type"] == "Symptom":
-            self.insert_symptom(report["PatientId"], keywords, report["Severity"])
+        self.insert_keywords(report_id,keywords_str)
         self.conn.commit()
         print(f"[DONE] Processed report {report_id}")
 
