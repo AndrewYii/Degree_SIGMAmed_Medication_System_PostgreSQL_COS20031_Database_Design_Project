@@ -8,8 +8,9 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Start transaction
 BEGIN;
-
 DO $$
+DECLARE 
+    doctor_exists BOOLEAN;
 DECLARE 
     clinicalinstitution_id UUID;
     new_user_id UUID;
@@ -19,15 +20,6 @@ BEGIN
 -- Select the clinical institution id for Gleaneagles Hospital
     SELECT "ClinicalInstitutionId" INTO clinicalinstitution_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName"='Gleaneagles Hospital' AND "IsDeleted"=FALSE;
 
--- Check whether the newly insert doctors already exists
-    IF EXISTS (
-        SELECT 1
-        FROM "SIGMAmed"."User"
-        WHERE "ICPassportNumber" = 'GH2849372949'
-          AND "IsDeleted" = FALSE
-    ) THEN
-        RAISE EXCEPTION 'The current user already exists';
-    END IF;
 -- Select the hospital admin role for Danielchester Medical Center
 SELECT u."UserId" INTO hospital_admin_id
 FROM "SIGMAmed"."User" AS u
@@ -44,36 +36,44 @@ RAISE NOTICE 'Switching ActedBy user to hospital admin ID: %', hospital_admin_id
 EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_id);
 
 -- Insert new User
-INSERT INTO "SIGMAmed"."User" (
-    "ClinicalInstitutionId",
-    "Username",
-    "Email",
-    "PasswordHash",
-    "Role",
-    "ICPassportNumber",
-    "FirstName",
-    "LastName",
-    "Phone",
-    "DateOfBirth",
-    "UpdatedAt",
-    "IsDeleted",
-    "CreatedAt"
-) VALUES (
-    clinicalinstitution_id, 
-    'yewcheng.moore101335',                    
-    'yewcheng88@gmail.com',                   
-    crypt('yewcheng123', gen_salt('bf')),  
-    'doctor',
-    'GH2849372949',
-    'Lim',
-    'Yew Cheng',
-    '(678)254-4653',
-    '1965-07-15',
-    NOW(),
-    FALSE,
-    NOW()
-)
-RETURNING "UserId","Role" INTO new_user_id, new_role;
+SELECT EXISTS (
+    SELECT 1
+    FROM "SIGMAmed"."User"
+    WHERE "ICPassportNumber" = 'GH2849372949'
+        AND "IsDeleted" = FALSE
+) INTO doctor_exists;
+IF doctor_exists IS FALSE THEN  
+    INSERT INTO "SIGMAmed"."User" (
+        "ClinicalInstitutionId",
+        "Username",
+        "Email",
+        "PasswordHash",
+        "Role",
+        "ICPassportNumber",
+        "FirstName",
+        "LastName",
+        "Phone",
+        "DateOfBirth",
+        "UpdatedAt",
+        "IsDeleted",
+        "CreatedAt"
+    ) VALUES (
+        clinicalinstitution_id, 
+        'yewcheng.moore101335',                    
+        'yewcheng88@gmail.com',                   
+        crypt('yewcheng123', gen_salt('bf')),  
+        'doctor',
+        'GH2849372949',
+        'Lim',
+        'Yew Cheng',
+        '(678)254-4653',
+        '1965-07-15',
+        NOW(),
+        FALSE,
+        NOW()
+    )
+    RETURNING "UserId","Role" INTO new_user_id, new_role;
+END IF;
 
 -- Update the record for doctor
 UPDATE "SIGMAmed"."Doctor"

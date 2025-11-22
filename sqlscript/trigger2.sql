@@ -519,10 +519,10 @@ BEFORE UPDATE ON "SIGMAmed"."MedicalHistory"
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at_timestamp();
 
--- CREATE TRIGGER set_updated_at_PatientSymptom
--- BEFORE UPDATE ON "SIGMAmed"."PatientSymptom"
--- FOR EACH ROW
--- EXECUTE FUNCTION public.set_updated_at_timestamp();
+CREATE TRIGGER set_updated_at_PatientSymptom
+BEFORE UPDATE ON "SIGMAmed"."PatientSymptom"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
 
 CREATE TRIGGER set_updated_at_PatientCareTeam
 BEFORE UPDATE ON "SIGMAmed"."PatientCareTeam"
@@ -539,20 +539,20 @@ BEFORE UPDATE ON "SIGMAmed"."PrescribedMedication"
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at_timestamp();
 
--- CREATE TRIGGER set_updated_at_PatientSideEffect
--- BEFORE UPDATE ON "SIGMAmed"."PatientSideEffect"
--- FOR EACH ROW
--- EXECUTE FUNCTION public.set_updated_at_timestamp();
+CREATE TRIGGER set_updated_at_PatientSideEffect
+BEFORE UPDATE ON "SIGMAmed"."PatientSideEffect"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
 
 CREATE TRIGGER set_updated_at_PrescribedMedicationSchedule
 BEFORE UPDATE ON "SIGMAmed"."PrescribedMedicationSchedule"
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at_timestamp();
 
--- CREATE TRIGGER set_updated_at_PatientReport
--- BEFORE UPDATE ON "SIGMAmed"."PatientReport"
--- FOR EACH ROW
--- EXECUTE FUNCTION public.set_updated_at_timestamp();
+CREATE TRIGGER set_updated_at_PatientReport
+BEFORE UPDATE ON "SIGMAmed"."PatientReport"
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at_timestamp();
 
 CREATE TRIGGER set_updated_at_Appointment
 BEFORE UPDATE ON "SIGMAmed"."Appointment"
@@ -664,9 +664,9 @@ AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."MedicalHistory"
 FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
 -- Table 9: Patient Symptom (PSym)
--- CREATE TRIGGER audit_psym_all
--- AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientSymptom"
--- FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+CREATE TRIGGER audit_psym_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientSymptom"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
 -- Table 10: Patient Care Team (PCT)
 CREATE TRIGGER audit_pct_all
@@ -683,10 +683,10 @@ CREATE TRIGGER audit_pmed_all
 AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PrescribedMedication"
 FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
--- -- Table 13: Patient Side Effect (PSE)
--- CREATE TRIGGER audit_pse_all
--- AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientSideEffect"
--- FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+-- Table 13: Patient Side Effect (PSE)
+CREATE TRIGGER audit_pse_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientSideEffect"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
 -- Table 14: Prescribed Medication Schedule (PMS)
 CREATE TRIGGER audit_pms_all
@@ -699,9 +699,9 @@ AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."MedicationAdherenceRecord"
 FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
 -- Table 16: Patient Report (PR)
--- CREATE TRIGGER audit_pr_all
--- AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientReport"
--- FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
+CREATE TRIGGER audit_pr_all
+AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientReport"
+FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
 -- Table 17: Appointment (Appt)
 CREATE TRIGGER audit_appt_all

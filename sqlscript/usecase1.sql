@@ -41,7 +41,7 @@ BEGIN
     END IF;
 
     IF hospital_exists AND admin_exists THEN
-        RAISE EXCEPTION 'Hospital and Admin already exist';
+        RAISE NOTICE 'Hospital and Admin already exist';
     ELSIF hospital_exists THEN
         RAISE NOTICE 'Hospital already exists, only inserting admin';
 
