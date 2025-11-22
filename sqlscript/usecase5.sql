@@ -19,7 +19,7 @@ BEGIN
         WHERE "MedicationName" = 'Paracetamol (500mg)'
         AND "IsDeleted" = FALSE
     ) THEN
-        RAISE EXCEPTION 'The current medication name already exists';
+        RAISE NOTICE 'The current medication name already exists';
     END IF;
 
 -- Select the clinical institution id of Gleaneagles Hospital
@@ -56,7 +56,7 @@ INSERT INTO "SIGMAmed"."Medication" (
     NOW(),
     'tablet',
     NOW()
-);
+) ON CONFLICT ("ClinicalInstitutionId", "MedicationName") DO NOTHING;
 
 INSERT INTO "SIGMAmed"."Medication" (
     "ClinicalInstitutionId",
@@ -74,7 +74,7 @@ INSERT INTO "SIGMAmed"."Medication" (
     NOW(),
     'tablet',
     NOW()
-);
+)ON CONFLICT ("ClinicalInstitutionId", "MedicationName") DO NOTHING;
 
 INSERT INTO "SIGMAmed"."Medication" (
     "ClinicalInstitutionId",
@@ -92,7 +92,7 @@ INSERT INTO "SIGMAmed"."Medication" (
     NOW(),
     'tablet',
     NOW()
-);
+)ON CONFLICT ("ClinicalInstitutionId", "MedicationName") DO NOTHING;
 
 
 END $$;

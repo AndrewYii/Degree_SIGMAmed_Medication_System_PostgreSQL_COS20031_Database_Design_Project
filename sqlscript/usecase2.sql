@@ -17,6 +17,8 @@ DECLARE
     daniel_exists BOOLEAN;
     super_admin_id UUID;
     hospital_admin_id UUID;
+    patient_exists BOOLEAN;
+    admin_exists BOOLEAN;
 BEGIN
     -- Select the super_admin_id
     SELECT "UserId" INTO super_admin_id FROM "SIGMAmed"."Admin" WHERE "AdminLevel"='super';
@@ -48,45 +50,51 @@ BEGIN
     SELECT "ClinicalInstitutionId" INTO clinicalinstitution_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName"='Danielchester Medical Center' AND "IsDeleted"=FALSE;
 
 -- Check whether the newly insert patients already exists
-    IF EXISTS (
+    SELECT EXISTS (
         SELECT 1
         FROM "SIGMAmed"."User"
         WHERE "ICPassportNumber" = 'XH69273838'
           AND "IsDeleted" = FALSE
-    ) THEN
-        RAISE EXCEPTION 'The current user already exists';
-    END IF;
+    ) INTO patient_exists;
 
     -- Insert new hospital admin and assigned to that hospital
-    INSERT INTO "SIGMAmed"."User" (
-        "ClinicalInstitutionId",
-        "Username",
-        "Email",
-        "PasswordHash",
-        "Role",
-        "ICPassportNumber",
-        "FirstName",
-        "LastName",
-        "Phone",
-        "DateOfBirth",
-        "UpdatedAt",
-        "IsDeleted",
-        "CreatedAt"
-    ) VALUES (
-        clinicalinstitution_id, 
-        'john.moore101335',                    
-        'john88@gmail.com',                   
-        crypt('john123', gen_salt('bf')),  
-        'admin',
-        'XH45434536',
-        'John',
-        'Lin',
-        '(678)453-7890',
-        '1971-08-08',
-        NOW(),
-        FALSE,
-        NOW()
-    );
+    SELECT EXISTS (
+        SELECT 1
+        FROM "SIGMAmed"."User"
+        WHERE "ICPassportNumber" = 'XH45434536'
+          AND "IsDeleted" = FALSE
+    ) INTO admin_exists;
+    IF admin_exists IS FALSE THEN
+        INSERT INTO "SIGMAmed"."User" (
+            "ClinicalInstitutionId",
+            "Username",
+            "Email",
+            "PasswordHash",
+            "Role",
+            "ICPassportNumber",
+            "FirstName",
+            "LastName",
+            "Phone",
+            "DateOfBirth",
+            "UpdatedAt",
+            "IsDeleted",
+            "CreatedAt"
+        ) VALUES (
+            clinicalinstitution_id, 
+            'john.moore101335',                    
+            'john88@gmail.com',                   
+            crypt('john123', gen_salt('bf')),  
+            'admin',
+            'XH45434536',
+            'John',
+            'Lin',
+            '(678)453-7890',
+            '1971-08-08',
+            NOW(),
+            FALSE,
+            NOW()
+        );
+    END IF;
     
     -- Select the hospital admin role for Danielchester Medical Center
     SELECT u."UserId" INTO hospital_admin_id
@@ -104,36 +112,38 @@ BEGIN
     EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_id);
 
 -- Insert new User
-INSERT INTO "SIGMAmed"."User" (
-    "ClinicalInstitutionId",
-    "Username",
-    "Email",
-    "PasswordHash",
-    "Role",
-    "ICPassportNumber",
-    "FirstName",
-    "LastName",
-    "Phone",
-    "DateOfBirth",
-    "UpdatedAt",
-    "IsDeleted",
-    "CreatedAt"
-) VALUES (
-    clinicalinstitution_id, 
-    'james.moore101335',                    
-    'james88@gmail.com',                   
-    crypt('MySecret123', gen_salt('bf')),  
-    'patient',
-    'XH69273838',
-    'James',
-    'Lin',
-    '(678)421-3453',
-    '1969-08-08',
-    NOW(),
-    FALSE,
-    NOW()
-)
-RETURNING "UserId","Role" INTO new_user_id, new_role;
+IF patient_exists IS FALSE THEN
+    INSERT INTO "SIGMAmed"."User" (
+        "ClinicalInstitutionId",
+        "Username",
+        "Email",
+        "PasswordHash",
+        "Role",
+        "ICPassportNumber",
+        "FirstName",
+        "LastName",
+        "Phone",
+        "DateOfBirth",
+        "UpdatedAt",
+        "IsDeleted",
+        "CreatedAt"
+    ) VALUES (
+        clinicalinstitution_id, 
+        'james.moore101335',                    
+        'james88@gmail.com',                   
+        crypt('MySecret123', gen_salt('bf')),  
+        'patient',
+        'XH69273838',
+        'James',
+        'Lin',
+        '(678)421-3453',
+        '1969-08-08',
+        NOW(),
+        FALSE,
+        NOW()
+    )
+    RETURNING "UserId","Role" INTO new_user_id, new_role;
+END IF;
 
 UPDATE "SIGMAmed"."Patient"
 SET

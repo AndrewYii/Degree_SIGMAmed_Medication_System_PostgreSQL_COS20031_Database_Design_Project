@@ -11,10 +11,17 @@ DO $$
 DECLARE 
     medication_id UUID;
     hospital_admin_id UUID;
+    changed_name BOOLEAN;
+    hospital_id UUID;
 BEGIN
--- Select the medication id based on the medication name
-SELECT "MedicationId" INTO medication_id FROM "SIGMAmed"."Medication" WHERE "MedicationName" = 'Paracetamol (500mg)' AND 
+-- Select the hospital id based on hospital name
+SELECT "ClinicalInstitutionId" INTO hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName" = 'Gleaneagles Hospital' AND 
     "IsDeleted"=FALSE;
+
+-- Select the medication id based on the medication name
+SELECT "MedicationId" INTO medication_id FROM "SIGMAmed"."Medication" WHERE "MedicationName" = 'Paracetamol (500mg)'  AND 
+    "IsDeleted"=FALSE
+AND "ClinicalInstitutionId"=hospital_id;
 
 -- Select the hospital admin role for Gleaneagles Hospital
 SELECT u."UserId" INTO hospital_admin_id
@@ -31,12 +38,21 @@ RAISE NOTICE 'Switching ActedBy user to hospital admin ID: %', hospital_admin_id
 EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_id);
 
 -- Update the record for medication name
-UPDATE "SIGMAmed"."Medication"
-SET
-    "MedicationName" = 'Paracetamol (400mg)'
-WHERE "MedicationId" = medication_id;
+SELECT EXISTS (
+    SELECT 1
+    FROM "SIGMAmed"."Medication"
+    WHERE "MedicationId" = medication_id
+        AND "MedicationName" = 'Paracetamol (400mg)'
+        AND "IsDeleted" = FALSE
+        AND "ClinicalInstitutionId" = hospital_id
+)INTO changed_name;
 
-
+IF changed_name IS FALSE THEN
+    UPDATE "SIGMAmed"."Medication"
+    SET
+        "MedicationName" = 'Paracetamol (400mg)'
+    WHERE "MedicationId" = medication_id ;
+END IF;
 
 END $$;
 -- Commit transaction

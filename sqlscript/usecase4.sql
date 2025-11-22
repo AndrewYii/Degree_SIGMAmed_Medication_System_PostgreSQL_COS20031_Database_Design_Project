@@ -18,6 +18,7 @@ DECLARE
     hospital_admin_id UUID;
     new_hospital_admin_id UUID;
     new_hospital_doctor_id UUID;
+    doctor_exists BOOLEAN;
 BEGIN
 -- Select the patient based on ICPassportNumber
     SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
@@ -58,35 +59,42 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_i
         "IsDeleted"=FALSE;
     END IF;
     -- Insert into doctor
-    INSERT INTO "SIGMAmed"."User" (
-        "ClinicalInstitutionId",
-        "Username",
-        "Email",
-        "PasswordHash",
-        "Role",
-        "ICPassportNumber",
-        "FirstName",
-        "LastName",
-        "Phone",
-        "DateOfBirth",
-        "UpdatedAt",
-        "IsDeleted",
-        "CreatedAt"
-    ) VALUES (
-        danielchester_hospital_id, 
-        'aryn.moore101335',                    
-        'aryn88@gmail.com',                   
-        crypt('aryn123', gen_salt('bf')),  
-        'doctor',
-        'GH72482384928',
-        'Aryn',
-        'Jee Mei Wei',
-        '(678)342-6756',
-        '2000-02-15',
-        NOW(),
-        FALSE,
-        NOW()
-    ) RETURNING "UserId" INTO danielchester_doctor_id;
+    SELECT EXISTS (
+        SELECT 1
+        FROM "SIGMAmed"."User"
+        WHERE "ICPassportNumber" = 'GH72482384928'
+          AND "IsDeleted" = FALSE
+    ) INTO doctor_exists;
+    IF doctor_exists IS FALSE THEN
+        INSERT INTO "SIGMAmed"."User" (
+            "ClinicalInstitutionId",
+            "Username",
+            "Email",
+            "PasswordHash",
+            "Role",
+            "ICPassportNumber",
+            "FirstName",
+            "LastName",
+            "Phone",
+            "DateOfBirth",
+            "UpdatedAt",
+            "IsDeleted",
+            "CreatedAt"
+        ) VALUES (
+            danielchester_hospital_id, 
+            'aryn.moore101335',                    
+            'aryn88@gmail.com',                   
+            crypt('aryn123', gen_salt('bf')),  
+            'doctor',
+            'GH72482384928',
+            'Aryn',
+            'Jee Mei Wei',
+            '(678)342-6756',
+            '2000-02-15',
+            NOW(),
+            FALSE,
+            NOW()
+        ) RETURNING "UserId" INTO danielchester_doctor_id;
     -- assigned for that doctor
     INSERT INTO "SIGMAmed"."PatientCareTeam" (
         "DoctorId",
@@ -97,6 +105,7 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_i
         user_id,                    
         'primary'
     );
+    END IF;
     -- Deactive the previous clinical institution's assigned doctor
      SELECT EXISTS (
         SELECT 
@@ -104,6 +113,7 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_i
         WHERE "PatientId" = user_id
           AND "IsActive" = TRUE
     ) INTO previous_assigned_doctor;
+
     IF previous_assigned_doctor THEN
         UPDATE "SIGMAmed"."PatientCareTeam"
         SET "IsActive" = FALSE
@@ -123,7 +133,7 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_admin_i
         new_hospital_doctor_id, 
         user_id,      
         'primary'
-    );
+    )ON CONFLICT ("DoctorId","PatientId","DoctorLevel") DO NOTHING;
 END $$;
 -- Commit transaction
 COMMIT;
