@@ -29,8 +29,6 @@ CREATE INDEX idx_prescribed_medication_status ON "SIGMAmed"."PrescribedMedicatio
 -- UC9
 
 -- MedicationAdherenceRecord Indexes
-CREATE INDEX idx_adherence_schedule_time ON "SIGMAmed"."MedicationAdherenceRecord"("ScheduledTime", "CurrentStatus"); 
--- UC14
 CREATE INDEX idx_adherence_schedule_id ON "SIGMAmed"."MedicationAdherenceRecord"("PrescribedMedicationScheduleId"); 
 -- UC11 (For trigger delete)
 
