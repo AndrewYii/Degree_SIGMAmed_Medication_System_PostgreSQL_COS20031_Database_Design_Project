@@ -7,7 +7,7 @@ CREATE INDEX idx_clinical_institution_name ON "SIGMAmed"."ClinicalInstitution"("
 
 -- User Indexes
 CREATE INDEX idx_user_email ON "SIGMAmed"."User"("Email") WHERE "IsDeleted" = FALSE;
-CREATE INDEX idx_user_role ON "SIGMAmed"."User"("Role") WHERE "IsDeleted" = FALSE;
+CREATE INDEX idx_user_ic_passport ON "SIGMAmed"."User"("ICPassportNumber") WHERE "IsDeleted" = FALSE;
 -- UC7,8,9,13,14,15
 
 -- Medication Indexes
