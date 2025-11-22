@@ -29,12 +29,11 @@ CREATE INDEX idx_prescribed_medication_status ON "SIGMAmed"."PrescribedMedicatio
 
 -- MedicationAdherenceRecord Indexes
 CREATE INDEX idx_adherence_schedule_time ON "SIGMAmed"."MedicationAdherenceRecord"("ScheduledTime", "PrescribedMedicationId");
--- UC14
+-- UC14 ##
 
 -- PrescribedMedicationSchedule Indexes
 CREATE INDEX idx_prescribed_schedule_medication ON "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationId"); 
 -- UC8,14
-CREATE INDEX idx_schedule_medication_time ON "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationId","ReminderTime"); -- UC10
 
 -- PatientReport Indexes
 CREATE INDEX idx_report_patient_time ON "SIGMAmed"."PatientReport"("PatientId","CreatedAt") WHERE "IsDeleted" = FALSE;
