@@ -13,34 +13,32 @@ CREATE INDEX idx_user_ic_passport ON "SIGMAmed"."User"("ICPassportNumber") WHERE
 
 -- Medication Indexes
 CREATE INDEX idx_medication_name ON "SIGMAmed"."Medication"("MedicationName") WHERE "IsDeleted" = FALSE;
--- UC8,9,14
+-- UC8
 
 -- Prescription Indexes
-CREATE INDEX idx_prescription_number ON "SIGMAmed"."Prescription"("PrescriptionNumber") WHERE "IsDeleted" = FALSE; --UC9
-CREATE INDEX idx_prescription_patient ON "SIGMAmed"."Prescription"("PatientId") WHERE "IsDeleted" = FALSE; -- UC14
+CREATE INDEX idx_prescription_number ON "SIGMAmed"."Prescription"("PrescriptionNumber") WHERE "IsDeleted" = FALSE; 
+-- UC9
+CREATE INDEX idx_prescription_patient ON "SIGMAmed"."Prescription"("PatientId") WHERE "IsDeleted" = FALSE; 
+-- UC14
 
 -- PrescribedMedication Indexes 
 CREATE INDEX idx_prescribed_medication_prescription ON "SIGMAmed"."PrescribedMedication"("PrescriptionId") WHERE "IsDeleted" = FALSE;
 -- UC7
 CREATE INDEX idx_prescribed_medication_medication ON "SIGMAmed"."PrescribedMedication"("MedicationId") WHERE "IsDeleted" = FALSE;
--- UC8
+-- UC14
 CREATE INDEX idx_prescribed_medication_status ON "SIGMAmed"."PrescribedMedication"("MedicationId","PrescriptionId","Status") WHERE "IsDeleted" = FALSE;
 -- UC9
 
 -- MedicationAdherenceRecord Indexes
-CREATE INDEX idx_adherence_schedule_time ON "SIGMAmed"."MedicationAdherenceRecord"("ScheduledTime", "CurrentStatus"); --UC14
-CREATE INDEX idx_adherence_schedule_id ON "SIGMAmed"."MedicationAdherenceRecord"("PrescribedMedicationScheduleId"); --UC11
+CREATE INDEX idx_adherence_schedule_time ON "SIGMAmed"."MedicationAdherenceRecord"("ScheduledTime", "CurrentStatus"); 
+-- UC14
+CREATE INDEX idx_adherence_schedule_id ON "SIGMAmed"."MedicationAdherenceRecord"("PrescribedMedicationScheduleId"); 
+-- UC11 (For trigger delete)
 
 -- PrescribedMedicationSchedule Indexes
-CREATE INDEX idx_prescribed_schedule_medication ON "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationId"); --UC11  
-CREATE INDEX idx_schedule_medication_time ON "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationId","ReminderTime"); --UC10
-
--- Appointment Indexes
-CREATE INDEX idx_appointment_patient ON "SIGMAmed"."Appointment"("PatientId","AppointmentDate") WHERE "IsDeleted" = FALSE;
--- UC15
-
--- PatientReport Indexes
-CREATE INDEX idx_patient_report_patient ON "SIGMAmed"."PatientReport"("PatientId") WHERE "IsDeleted" = FALSE; -- UC13
+CREATE INDEX idx_prescribed_schedule_medication ON "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationId"); 
+-- UC11 (For trigger delete)
+CREATE INDEX idx_schedule_medication_time ON "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationId","ReminderTime"); -- UC10
 
 -- MedicalHistory Indexes
 CREATE INDEX idx_medical_history_patient ON "SIGMAmed"."MedicalHistory"("PatientId") WHERE "IsDeleted" = FALSE;
@@ -48,3 +46,4 @@ CREATE INDEX idx_medical_history_patient ON "SIGMAmed"."MedicalHistory"("Patient
 
 -- PatientSymptom Indexes
 CREATE INDEX idx_patient_symptoms_medical_history ON "SIGMAmed"."PatientSymptom"("MedicalHistoryID") WHERE "IsDeleted" = FALSE;
+-- UC7
