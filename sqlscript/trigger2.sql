@@ -698,11 +698,6 @@ CREATE TRIGGER audit_mar_all
 AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."MedicationAdherenceRecord"
 FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
--- Table 16: Patient Report (PR)
-CREATE TRIGGER audit_pr_all
-AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientReport"
-FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
-
 -- Table 17: Appointment (Appt)
 CREATE TRIGGER audit_appt_all
 AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."Appointment"
