@@ -49,3 +49,51 @@ The repository uses a **(x.y)** versioning system:
 
 ---
 👉 This README will evolve as the project progresses, with all updates tracked through the versioning system above.
+
+---
+## Kinetica Side-Effect Analysis
+Pipeline: `kinetica_analysis_medication.py` pulls data from Postgres and loads Kinetica tables for dashboards:
+- `medication_features`
+- `side_effects_by_medication`
+- `side_effects_by_patient`
+- `top_side_effects`
+
+### Prerequisites
+- Python 3.10+
+- Install deps: `pip install gpudb psycopg2-binary python-dotenv`
+- Network access to your Postgres and Kinetica instances
+
+### .env keys (example)
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=your_db_password
+DB_SCHEMA=SIGMAmed
+
+KINETICA_HOST=https://<your_cluster>/gpudb-0
+KINETICA_PORT=443
+KINETICA_USERNAME=your_user
+KINETICA_PASSWORD=your_password
+KINETICA_SCHEMA=        # leave blank to use your default namespace, or set if you have schema rights
+KINETICA_USE_TLS=true
+```
+
+### Run
+```
+$env:NO_PROXY="<your_cluster>"
+foreach ($v in "HTTPS_PROXY","https_proxy","HTTP_PROXY","http_proxy"){Remove-Item Env:$v -ErrorAction SilentlyContinue}
+py kinetica_analysis_medication.py --limit 500   # omit --limit for full load
+```
+- Script drops and recreates the four target tables each run.
+
+### Quick SQL checks (Workbench)
+- `SELECT COUNT(*) FROM side_effects_by_medication;`
+- `SELECT patient_name, report_count FROM side_effects_by_patient ORDER BY report_count DESC LIMIT 10;`
+- `SELECT * FROM top_side_effects ORDER BY total_reports DESC LIMIT 10;`
+
+### Suggested charts
+- Side effects by medication: X=`side_effect_name`, Y=`report_count`, Color=`medication_name`, optional Stack=`severity`.
+- Patients reporting most side effects: X=`patient_name` (or `patient_username`), Y=`report_count`, tooltip `unique_side_effects`, `medications`.
+- Overall top side effects: X=`side_effect_name`, Y=`total_reports`, tooltip `top_medication`, `top_medication_report_count`.
