@@ -28,7 +28,7 @@ CREATE INDEX idx_prescribed_medication_status ON "SIGMAmed"."PrescribedMedicatio
 -- UC9
 
 -- MedicationAdherenceRecord Indexes
-CREATE INDEX idx_adherence_schedule_time ON "SIGMAmed"."MedicationAdherenceRecord"("ScheduledTime", "PrescribedMedicationScheduleId");
+CREATE INDEX idx_adherence_schedule ON "SIGMAmed"."MedicationAdherenceRecord"("ScheduledTime", "PrescribedMedicationScheduleId");
 -- UC14 ##
 
 -- PrescribedMedicationSchedule Indexes
