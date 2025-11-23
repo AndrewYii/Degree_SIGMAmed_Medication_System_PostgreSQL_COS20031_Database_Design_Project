@@ -22,8 +22,6 @@ CREATE INDEX idx_prescription_patient_date ON "SIGMAmed"."Prescription"("Patient
 -- PrescribedMedication Indexes 
 CREATE INDEX idx_prescribed_medication_prescription ON "SIGMAmed"."PrescribedMedication"("PrescriptionId") WHERE "IsDeleted" = FALSE;
 -- UC7,8,9
-CREATE INDEX idx_prescribed_medication_medication ON "SIGMAmed"."PrescribedMedication"("MedicationId") WHERE "IsDeleted" = FALSE;
--- UC8,9,13,14
 CREATE INDEX idx_prescribed_medication_status ON "SIGMAmed"."PrescribedMedication"("MedicationId","PrescriptionId","Status") WHERE "IsDeleted" = FALSE;
 -- UC9
 
@@ -60,5 +58,5 @@ CREATE INDEX idx_medical_history_patient ON "SIGMAmed"."MedicalHistory"("Patient
 -- UC7
 
 -- PatientSymptom Indexes
-CREATE INDEX idx_patient_symptoms_medical_history ON "SIGMAmed"."PatientSymptom"("MedicalHistoryID") WHERE "IsDeleted" = FALSE;
+CREATE INDEX idx_patient_symptoms_medical_history ON "SIGMAmed"."PatientSymptom"("MedicalHistoryId") WHERE "IsDeleted" = FALSE;
 -- UC7
