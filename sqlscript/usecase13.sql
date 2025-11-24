@@ -21,8 +21,9 @@ BEGIN
 -- Select the patient id based on ICPassportNumber
     SELECT "UserId" INTO user_id FROM "SIGMAmed"."User" WHERE "ICPassportNumber"='XH69273838' AND "IsDeleted"=FALSE;
 
-RAISE NOTICE 'Switching ActedBy user to Doctor ID: %', user_id;
+
 EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(user_id);
+RAISE NOTICE 'Switching ActedBy user to Patient ID: %', current_setting('app.current_user_id',TRUE);
 
 -- Insert the new patient report record inside the patient report table 
 INSERT INTO "SIGMAmed"."PatientReport" (

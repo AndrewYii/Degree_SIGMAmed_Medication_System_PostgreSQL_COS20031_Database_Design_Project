@@ -36,6 +36,8 @@ VALUES (
     'follow-up'
 );
 
+-- Insert new record 
+
 END $$;
 -- Commit transaction
 COMMIT;

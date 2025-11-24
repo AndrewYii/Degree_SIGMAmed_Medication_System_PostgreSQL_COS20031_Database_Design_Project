@@ -6,7 +6,7 @@ BEGIN;
 
 CREATE TABLE "SIGMAmed"."MedicationAdherenceRecord" (
     "MedicationAdherenceRecordId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "PrescribedMedicationScheduleId" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationScheduleId"),
+    "PrescribedMedicationScheduleId" UUID NULL REFERENCES "SIGMAmed"."PrescribedMedicationSchedule"("PrescribedMedicationScheduleId") ON DELETE CASCADE,
     "CurrentStatus" "SIGMAmed".reminder_status_enum DEFAULT 'Pending',
     "DoseQuantity" DECIMAL(5,2) NULL,
     "ScheduledTime" TIMESTAMPTZ NOT NULL,

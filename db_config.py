@@ -7,7 +7,7 @@ load_dotenv()
 class DBConfig:
     HOST = os.getenv('DB_HOST', 'localhost')
     PORT = os.getenv('DB_PORT', '5432')
-    NAME = os.getenv('DB_NAME', 'postgres')
+    NAME = os.getenv('DB_NAME', 'SIGMAmed')
     USER = os.getenv('DB_USER', 'postgres')
     PASSWORD = os.getenv('DB_PASSWORD', '')
     SCHEMA = os.getenv('DB_SCHEMA', 'SIGMAmed')

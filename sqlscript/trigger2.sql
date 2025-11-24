@@ -364,7 +364,7 @@ FOR EACH ROW
 EXECUTE FUNCTION "SIGMAmed".fn_create_adherence_after_change();
 
 
--- FUNCTION: Delete the related record in prescribed medication schedule table and medication adherence record table
+-- FUNCTION: Delete the related record in prescribed medication schedule table 
 CREATE OR REPLACE FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -376,15 +376,7 @@ DECLARE
 BEGIN
     IF NEW."DefaultDayMask" IS DISTINCT FROM OLD."DefaultDayMask" THEN
 
-        -- 1. Delete adherence records (they reference schedule IDs)
-        DELETE FROM "SIGMAmed"."MedicationAdherenceRecord"
-        WHERE "PrescribedMedicationScheduleId" IN (
-            SELECT "PrescribedMedicationScheduleId"
-            FROM "SIGMAmed"."PrescribedMedicationSchedule"
-            WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId"
-        );
-
-        -- 2. Delete schedule records
+        -- 1. Delete schedule records
         DELETE FROM "SIGMAmed"."PrescribedMedicationSchedule"
         WHERE "PrescribedMedicationId" = NEW."PrescribedMedicationId";
         
@@ -412,7 +404,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change IS 'Delete the related record in prescribed medication schedule table and medication adherence record table.';
+COMMENT ON FUNCTION "SIGMAmed".fn_rebuild_schedule_on_mask_change IS 'Delete the related record in prescribed medication schedule table.';
 
 CREATE TRIGGER trg_after_mask_update
 AFTER UPDATE OF "DefaultDayMask"
@@ -696,11 +688,6 @@ FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 -- Table 15: Medication Adherence Record (MAR)
 CREATE TRIGGER audit_mar_all
 AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."MedicationAdherenceRecord"
-FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
-
--- Table 16: Patient Report (PR)
-CREATE TRIGGER audit_pr_all
-AFTER INSERT OR UPDATE OR DELETE ON "SIGMAmed"."PatientReport"
 FOR EACH ROW EXECUTE FUNCTION "SIGMAmed".audit_log_capture_function();
 
 -- Table 17: Appointment (Appt)
