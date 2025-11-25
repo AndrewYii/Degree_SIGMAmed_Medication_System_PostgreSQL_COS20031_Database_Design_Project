@@ -20,7 +20,7 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(patient_id);
 -- Update the CurrentStatus and DoseQuantity column in the MedicationAdherenceRecord table
 UPDATE "SIGMAmed"."MedicationAdherenceRecord"
 SET "CurrentStatus" = 'Taken', "DoseQuantity" = 1
-WHERE "MedicationAdherenceRecordId" = '01f74c3a-7ad7-4358-adfc-3d5283a38b4c';
+WHERE "MedicationAdherenceRecordId" = '0000fea7-abe8-482d-b9f7-e81bf0300bdf';
 
 END $$;
 -- Commit transaction
