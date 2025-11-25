@@ -1,2 +1,7 @@
+psycopg2
+gpudb
+python-dotenv
+medspacy
 openai-whisper
 torch
+sqlalchemy
