@@ -24,7 +24,7 @@ DB_PASSWORD=postgres
 DB_SCHEMA=SIGMAmed
 
 # Kinetica Cloud Configuration
-KINETICA_HOST=cluster1450.saas.kinetica.com
+KINETICA_HOST=https://cluster1450.saas.kinetica.com/cluster1450/gpudb-0
 KINETICA_PORT=9191
 KINETICA_USERNAME=arynjee_gmail
 KINETICA_PASSWORD=Aryn050609
