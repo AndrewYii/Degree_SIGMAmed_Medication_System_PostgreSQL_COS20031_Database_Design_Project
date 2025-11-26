@@ -15,7 +15,7 @@ DECLARE
     patient_id UUID;
 BEGIN
 -- Select the DoseSequenceId and PrescribedMedicationId from old record
-SELECT "DoseSequenceId","PrescribedMedicationId" INTO sequence_id, prescribedmedication_id FROM "SIGMAmed"."PrescribedMedicationSchedule" WHERE "PrescribedMedicationScheduleId" = '3c33ecd0-b9af-4fe3-ba07-f2a2523f0a16'; --Replace to the real one
+SELECT "DoseSequenceId","PrescribedMedicationId" INTO sequence_id, prescribedmedication_id FROM "SIGMAmed"."PrescribedMedicationSchedule" WHERE "PrescribedMedicationScheduleId" = '000086f5-b562-4fb5-863e-1565d0fb3f66'; --Replace to the real one
 
 -- Select the patient id 
     SELECT "UserId"
@@ -27,7 +27,7 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(patient_id);
 -- Update the schedule’s day-of-week mask
 UPDATE "SIGMAmed"."PrescribedMedicationSchedule"
 SET "DayOfWeekMask" = '1011111' 
-WHERE "PrescribedMedicationScheduleId" = '3c33ecd0-b9af-4fe3-ba07-f2a2523f0a16';  --Replace to the real one
+WHERE "PrescribedMedicationScheduleId" = '000086f5-b562-4fb5-863e-1565d0fb3f66';  --Replace to the real one
 
 -- Assumption: the patient only update the reminder time for tuesday from 8:00am to 8:15am
 SELECT "PrescribedMedicationScheduleId" INTO existing_id FROM "SIGMAmed"."PrescribedMedicationSchedule" WHERE "PrescribedMedicationId" = prescribedmedication_id AND "ReminderTime" = '08:15:00';
