@@ -4,9 +4,6 @@ SET search_path TO "SIGMAmed", public;
 -- Ensure uuid-ossp extension is available (for UUIDs)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
--- Start transaction
-BEGIN;
-
 DO $$
 DECLARE 
     secondary_doctor_id UUID;
@@ -78,5 +75,3 @@ VALUES (
 );
 
 END $$;
--- Commit transaction
-COMMIT;
