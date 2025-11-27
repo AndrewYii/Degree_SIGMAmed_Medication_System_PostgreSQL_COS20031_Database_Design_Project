@@ -111,4 +111,3 @@ EXECUTE 'SET SESSION "app.current_user_id" = ' || quote_literal(hospital_doctor_
       AND "ScheduledTime" >= CURRENT_DATE - INTERVAL '30 days';
 
 END $$;
-COMMIT;
