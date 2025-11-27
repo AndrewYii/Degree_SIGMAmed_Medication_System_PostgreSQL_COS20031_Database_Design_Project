@@ -1002,6 +1002,7 @@ GRANT SELECT ON TABLE "SIGMAmed"."PatientSideEffect" TO sigmamed_hospital_admin;
 GRANT SELECT ON TABLE "SIGMAmed"."PatientReport" TO sigmamed_hospital_admin;
 GRANT SELECT ON TABLE "SIGMAmed"."AuditLog" TO sigmamed_hospital_admin;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA "SIGMAmed" TO sigmamed_hospital_admin;
+GRANT USAGE IN SCHEMA "SIGMAmed" TO sigmamed_hospital_admin;
 
 GRANT SELECT ON TABLE "SIGMAmed"."User" TO sigmamed_doctor;
 GRANT SELECT ON TABLE "SIGMAmed"."Doctor" TO sigmamed_doctor;
@@ -1021,6 +1022,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "SIGMAmed"."PatientSideEffect" TO 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "SIGMAmed"."PatientReport" TO sigmamed_doctor;
 GRANT SELECT ON TABLE "SIGMAmed"."AuditLog" TO sigmamed_doctor;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA "SIGMAmed" TO sigmamed_doctor;
+GRANT USAGE IN SCHEMA "SIGMAmed" TO sigmamed_doctor;
 
 GRANT SELECT ON TABLE "SIGMAmed"."User" TO sigmamed_patient;
 GRANT SELECT ON TABLE "SIGMAmed"."Patient" TO sigmamed_patient;
@@ -1038,6 +1040,7 @@ GRANT SELECT ON TABLE "SIGMAmed"."PatientSymptom" TO sigmamed_patient;
 GRANT SELECT ON TABLE "SIGMAmed"."PatientSideEffect" TO sigmamed_patient;
 GRANT SELECT, INSERT, UPDATE ON TABLE "SIGMAmed"."PatientReport" TO sigmamed_patient;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA "SIGMAmed" TO sigmamed_patient;
+GRANT USAGE IN SCHEMA "SIGMAmed" TO sigmamed_patient;
 
 -- SECURITY HELPER FUNCTIONS
 CREATE OR REPLACE FUNCTION "SIGMAmed".current_user_id()

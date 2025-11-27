@@ -1,4 +1,4 @@
--- No need to run this script, as all type already exists in dummy.sql
+-- If restore dummy.sql, no need to run this script, as all type already created in dummy.sql
 
 -- Create Enums for SIGMAmed
 CREATE TYPE "SIGMAmed".user_role_enum AS ENUM ('admin', 'doctor', 'patient');
