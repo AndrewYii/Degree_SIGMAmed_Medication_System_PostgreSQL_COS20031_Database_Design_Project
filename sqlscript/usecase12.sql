@@ -4,9 +4,6 @@ SET search_path TO "SIGMAmed", public;
 -- Ensure uuid-ossp extension is available (for UUIDs)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
--- Start transaction
-BEGIN;
-
 DO $$
 DECLARE 
     patient_id UUID;
@@ -23,5 +20,3 @@ SET "CurrentStatus" = 'Taken', "DoseQuantity" = 1
 WHERE "MedicationAdherenceRecordId" = '0000fea7-abe8-482d-b9f7-e81bf0300bdf';
 
 END $$;
--- Commit transaction
-COMMIT;

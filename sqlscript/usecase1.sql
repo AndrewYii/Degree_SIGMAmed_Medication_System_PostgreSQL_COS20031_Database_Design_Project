@@ -37,7 +37,7 @@ BEGIN
     ) INTO admin_exists;
 
     IF hospital_exists THEN
-        SELECT "ClinicalInstitutionID" INTO new_hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName"='Gleaneagles Hospital' AND "IsDeleted"=FALSE;
+        SELECT "ClinicalInstitutionId" INTO new_hospital_id FROM "SIGMAmed"."ClinicalInstitution" WHERE "ClinicalInstitutionName"='Gleaneagles Hospital' AND "IsDeleted"=FALSE;
     END IF;
 
     IF hospital_exists AND admin_exists THEN

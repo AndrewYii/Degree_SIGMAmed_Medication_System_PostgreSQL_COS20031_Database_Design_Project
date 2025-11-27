@@ -4,9 +4,6 @@ SET search_path TO "SIGMAmed", public;
 -- Ensure uuid-ossp extension is available (for UUIDs)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
--- Start transaction
-BEGIN;
-
 DO $$
 DECLARE 
     medication_id UUID;
@@ -55,7 +52,5 @@ IF changed_name IS FALSE THEN
 END IF;
 
 END $$;
--- Commit transaction
-COMMIT;
 
 
