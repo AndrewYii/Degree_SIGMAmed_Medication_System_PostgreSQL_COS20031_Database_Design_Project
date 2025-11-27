@@ -1339,7 +1339,6 @@ FROM
 WHERE
 	MH."IsDeleted" = FALSE;
 
-END $$;
 
 -- Create the view of patient's prescription 
 CREATE OR REPLACE VIEW "SIGMAmed"."PatientPrescriptionsView" AS
@@ -1440,5 +1439,3 @@ CREATE INDEX idx_medical_history_patient ON "SIGMAmed"."MedicalHistory"("Patient
 
 -- PatientSymptom Indexes
 CREATE INDEX idx_patient_symptoms_medical_history ON "SIGMAmed"."PatientSymptom"("MedicalHistoryId") WHERE "IsDeleted" = FALSE;
-
-
